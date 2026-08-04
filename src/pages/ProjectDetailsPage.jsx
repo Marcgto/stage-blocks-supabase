@@ -1,6 +1,9 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
+import AppHeader from '../components/AppHeader';
+import PageDescriptor from '../components/PageDescriptor';
+import AppFooter from '../components/AppFooter';
 
 export default function ProjectDetailsPage() {
   const { projectId } = useParams();
@@ -13,6 +16,16 @@ export default function ProjectDetailsPage() {
   useEffect(() => {
     loadProject();
     loadCounts();
+  }, [projectId]);
+
+  // Re-load counts whenever this component gets focus
+  useEffect(() => {
+    const handleFocus = () => {
+      loadCounts();
+    };
+
+    window.addEventListener('focus', handleFocus);
+    return () => window.removeEventListener('focus', handleFocus);
   }, [projectId]);
 
   const loadProject = async () => {
@@ -29,24 +42,28 @@ export default function ProjectDetailsPage() {
   };
 
   const loadCounts = async () => {
-    // Get character count
-    const { data: characters, error: charError } = await supabase
-      .from('characters')
-      .select('id', { count: 'exact', head: true })
-      .eq('project_id', projectId);
+    try {
+      // Get character count
+      const { count: charCount, error: charError } = await supabase
+        .from('characters')
+        .select('*', { count: 'exact', head: true })
+        .eq('project_id', projectId);
 
-    if (!charError) {
-      setCharacterCount(characters?.length || 0);
-    }
+      if (!charError && charCount !== null) {
+        setCharacterCount(charCount);
+      }
 
-    // Get member count
-    const { data: members, error: memError } = await supabase
-      .from('project_members')
-      .select('id', { count: 'exact', head: true })
-      .eq('project_id', projectId);
+      // Get member count
+      const { count: memberCountResult, error: memError } = await supabase
+        .from('project_members')
+        .select('*', { count: 'exact', head: true })
+        .eq('project_id', projectId);
 
-    if (!memError) {
-      setMemberCount(members?.length || 0);
+      if (!memError && memberCountResult !== null) {
+        setMemberCount(memberCountResult);
+      }
+    } catch (err) {
+      console.error('Error loading counts:', err);
     }
   };
 
@@ -73,53 +90,30 @@ export default function ProjectDetailsPage() {
       flexDirection: 'column'
     }}>
       {/* Header */}
-      <header style={{
-        textAlign: 'center',
-        marginBottom: '3rem',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: '0.5rem'
-      }}>
-        <h1 style={{
-          fontSize: '28px',
-          fontWeight: 600,
-          color: '#A68C2C',
-          margin: 0
-        }}>
-          {project?.name || 'Project'}
-        </h1>
-        <p style={{
-          fontSize: '14px',
-          color: '#A68C2C',
-          margin: 0,
-          opacity: 0.9
-        }}>
-          Project Manager
-        </p>
-      </header>
+      <AppHeader projectName={project?.name} />
+
+      {/* Page Descriptor */}
+      <PageDescriptor description="Dashboard" />
 
       {/* Main content - Setup Sections */}
       <main style={{
         flex: 1,
         display: 'flex',
         alignItems: 'center',
-        justifyContent: 'center',
-        marginBottom: '2rem'
+        justifyContent: 'center'
       }}>
         <div style={{
           display: 'flex',
-          gap: '1.5rem',
+          gap: '20px',
           flexWrap: 'wrap',
           justifyContent: 'center',
-          maxWidth: '900px'
+          maxWidth: '500px'
         }}>
-          {/* Characters Button - ACTIVE */}
+          {/* Members Button - ACTIVE BY DEFAULT */}
           <button
-            onClick={() => navigate(`/project/${projectId}/characters`)}
+            onClick={() => navigate(`/project/${projectId}/members`)}
             style={{
-              width: '160px',
+              width: '220px',
               height: '160px',
               backgroundColor: '#5A2020',
               border: '2px solid #A68C2C',
@@ -138,52 +132,15 @@ export default function ProjectDetailsPage() {
             onMouseEnter={(e) => e.target.style.backgroundColor = '#6B2C2C'}
             onMouseLeave={(e) => e.target.style.backgroundColor = '#5A2020'}
           >
-            Characters
-          </button>
-
-          {/* Members Button - UNLOCKS when 1+ characters exist */}
-          <button
-            disabled={characterCount === 0}
-            onClick={() => navigate(`/project/${projectId}/members`)}
-            style={{
-              width: '160px',
-              height: '160px',
-              backgroundColor: characterCount > 0 ? '#5A2020' : '#3A2020',
-              border: characterCount > 0 ? '2px solid #A68C2C' : '2px solid #666666',
-              borderRadius: '4px',
-              color: characterCount > 0 ? '#A68C2C' : '#888888',
-              fontSize: '16px',
-              fontWeight: 600,
-              cursor: characterCount > 0 ? 'pointer' : 'not-allowed',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              textAlign: 'center',
-              padding: '1rem',
-              transition: 'background-color 0.2s ease',
-              opacity: characterCount > 0 ? 1 : 0.6
-            }}
-            onMouseEnter={(e) => {
-              if (characterCount > 0) {
-                e.target.style.backgroundColor = '#6B2C2C';
-              }
-            }}
-            onMouseLeave={(e) => {
-              if (characterCount > 0) {
-                e.target.style.backgroundColor = '#5A2020';
-              }
-            }}
-            title={characterCount === 0 ? 'Add at least 1 character first' : ''}
-          >
             Members
           </button>
 
-          {/* Scenes Button - UNLOCKS when 1+ members exist */}
+          {/* Characters Button - UNLOCKS when 1+ members exist */}
           <button
             disabled={memberCount === 0}
-            onClick={() => navigate(`/project/${projectId}/scenes`)}
+            onClick={() => navigate(`/project/${projectId}/characters`)}
             style={{
-              width: '160px',
+              width: '220px',
               height: '160px',
               backgroundColor: memberCount > 0 ? '#5A2020' : '#3A2020',
               border: memberCount > 0 ? '2px solid #A68C2C' : '2px solid #666666',
@@ -212,26 +169,50 @@ export default function ProjectDetailsPage() {
             }}
             title={memberCount === 0 ? 'Add at least 1 member first' : ''}
           >
+            Characters
+          </button>
+
+          {/* Scenes Button - UNLOCKS when 1+ characters exist */}
+          <button
+            disabled={characterCount === 0}
+            onClick={() => navigate(`/project/${projectId}/scenes`)}
+            style={{
+              width: '220px',
+              height: '160px',
+              backgroundColor: characterCount > 0 ? '#5A2020' : '#3A2020',
+              border: characterCount > 0 ? '2px solid #A68C2C' : '2px solid #666666',
+              borderRadius: '4px',
+              color: characterCount > 0 ? '#A68C2C' : '#888888',
+              fontSize: '16px',
+              fontWeight: 600,
+              cursor: characterCount > 0 ? 'pointer' : 'not-allowed',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              textAlign: 'center',
+              padding: '1rem',
+              transition: 'background-color 0.2s ease',
+              opacity: characterCount > 0 ? 1 : 0.6
+            }}
+            onMouseEnter={(e) => {
+              if (characterCount > 0) {
+                e.target.style.backgroundColor = '#6B2C2C';
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (characterCount > 0) {
+                e.target.style.backgroundColor = '#5A2020';
+              }
+            }}
+            title={characterCount === 0 ? 'Add at least 1 character first' : ''}
+          >
             Scenes
           </button>
         </div>
       </main>
 
-      {/* Back Button */}
-      <footer style={{
-        display: 'flex',
-        justifyContent: 'flex-start'
-      }}>
-        <button
-          onClick={() => navigate(`/project/${projectId}`)}
-          className="btn-theater"
-          style={{
-            padding: '0.75rem 1.5rem'
-          }}
-        >
-          ← Back to Main Menu
-        </button>
-      </footer>
+      {/* Footer - Back & Logout */}
+      <AppFooter backTo="/" showLogout={true} />
     </div>
   );
 }

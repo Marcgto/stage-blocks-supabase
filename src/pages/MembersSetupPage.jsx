@@ -1,11 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
+import AppHeader from '../components/AppHeader';
+import PageDescriptor from '../components/PageDescriptor';
+import AppFooter from '../components/AppFooter';
 
 export default function MembersSetupPage() {
   const { projectId } = useParams();
   const navigate = useNavigate();
   
+  const [project, setProject] = useState(null);
   const [members, setMembers] = useState([]);
   const [memberName, setMemberName] = useState('');
   const [memberEmail, setMemberEmail] = useState('');
@@ -13,10 +17,23 @@ export default function MembersSetupPage() {
   const [error, setError] = useState('');
   const [deleteConfirm, setDeleteConfirm] = useState(null);
 
-  // Fetch members on load
   useEffect(() => {
+    loadProject();
     fetchMembers();
   }, [projectId]);
+
+  const loadProject = async () => {
+    const { data, error } = await supabase
+      .from('projects')
+      .select('*')
+      .eq('id', projectId)
+      .single();
+
+    if (!error) {
+      setProject(data);
+    }
+    setLoading(false);
+  };
 
   const fetchMembers = async () => {
     try {
@@ -47,10 +64,6 @@ export default function MembersSetupPage() {
     }
 
     try {
-      // Get the current user from auth
-      const { data: { user }, error: userError } = await supabase.auth.getUser();
-      if (userError || !user) throw new Error('Not authenticated');
-
       // Calculate sequence (add to end)
       const maxSequence = members.length > 0 
         ? Math.max(...members.map(m => m.sequence || 0))
@@ -61,7 +74,6 @@ export default function MembersSetupPage() {
         .insert([
           {
             project_id: projectId,
-            user_id: user.id,
             name: memberName.trim(),
             email: memberEmail.trim(),
             sequence: maxSequence + 1
@@ -102,139 +114,329 @@ export default function MembersSetupPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#4A1A1A] text-white flex items-center justify-center">
-        <p className="text-lg">Loading members...</p>
+      <div style={{
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: '#4A1A1A'
+      }}>
+        <p style={{ color: '#A68C2C', fontSize: '18px' }}>Loading...</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#4A1A1A] text-white p-6">
-      <div className="max-w-2xl mx-auto">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-[#A68C2C] mb-2">Members</h1>
-          <p className="text-gray-300">Add members to your project</p>
+    <div style={{
+      minHeight: '100vh',
+      backgroundColor: '#4A1A1A',
+      padding: '1rem',
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center'
+    }}>
+      {/* Header */}
+      <AppHeader projectName={project?.name} />
+
+      {/* Page Descriptor */}
+      <PageDescriptor description="Add all the project members and send invites." />
+
+      {/* Error message */}
+      {error && (
+        <div style={{
+          width: '460px',
+          marginBottom: '1rem',
+          padding: '1rem',
+          backgroundColor: '#3A1A1A',
+          border: '2px solid #A32D2D',
+          borderRadius: '4px',
+          color: '#A32D2D',
+          fontSize: '14px'
+        }}>
+          {error}
         </div>
+      )}
 
-        {/* Error message */}
-        {error && (
-          <div className="mb-6 p-4 bg-red-900 border-2 border-red-700 rounded-lg text-red-100">
-            {error}
-          </div>
-        )}
-
+      {/* Main content */}
+      <main style={{
+        flex: 1,
+        width: '100%',
+        maxWidth: '460px',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '1.5rem'
+      }}>
         {/* Add Member Form */}
-        <form onSubmit={handleAddMember} className="mb-8 p-6 bg-[#5A2020] rounded-lg border-2 border-[#A68C2C]">
-          <h2 className="text-xl font-bold text-[#A68C2C] mb-4">Add New Member</h2>
-          
-          <div className="space-y-4">
-            <div>
-              <label className="block text-[#A68C2C] font-semibold mb-2">
-                Member Name
-              </label>
-              <input
-                type="text"
-                value={memberName}
-                onChange={(e) => setMemberName(e.target.value)}
-                placeholder="e.g., Sarah Jones"
-                className="w-full px-4 py-2 bg-[#3A1A1A] border-2 border-[#A68C2C] text-white placeholder-gray-500 rounded-lg focus:outline-none focus:border-[#D4A574]"
-              />
-            </div>
+        <form onSubmit={handleAddMember} style={{
+          backgroundColor: '#5A2020',
+          border: '2px solid #A68C2C',
+          borderRadius: '4px',
+          padding: '1.5rem',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '1rem'
+        }}>
+          <h2 style={{
+            fontSize: '18px',
+            fontWeight: 600,
+            color: '#A68C2C',
+            margin: 0
+          }}>
+            Add New Member
+          </h2>
 
-            <div>
-              <label className="block text-[#A68C2C] font-semibold mb-2">
-                Email Address
-              </label>
-              <input
-                type="email"
-                value={memberEmail}
-                onChange={(e) => setMemberEmail(e.target.value)}
-                placeholder="e.g., sarah@example.com"
-                className="w-full px-4 py-2 bg-[#3A1A1A] border-2 border-[#A68C2C] text-white placeholder-gray-500 rounded-lg focus:outline-none focus:border-[#D4A574]"
-              />
-            </div>
-
-            <button
-              type="submit"
-              className="w-full py-3 bg-[#A68C2C] text-[#4A1A1A] font-bold rounded-lg hover:bg-[#D4A574] transition-colors"
-            >
-              Add Member
-            </button>
+          <div>
+            <label style={{
+              display: 'block',
+              color: '#A68C2C',
+              fontWeight: 600,
+              marginBottom: '0.5rem',
+              fontSize: '14px'
+            }}>
+              Member Name
+            </label>
+            <input
+              type="text"
+              value={memberName}
+              onChange={(e) => setMemberName(e.target.value)}
+              placeholder="e.g., Sarah Jones"
+              style={{
+                width: '100%',
+                padding: '0.75rem',
+                backgroundColor: '#3A1A1A',
+                border: '2px solid #A68C2C',
+                borderRadius: '4px',
+                color: '#ffffff',
+                fontSize: '14px',
+                boxSizing: 'border-box'
+              }}
+            />
           </div>
+
+          <div>
+            <label style={{
+              display: 'block',
+              color: '#A68C2C',
+              fontWeight: 600,
+              marginBottom: '0.5rem',
+              fontSize: '14px'
+            }}>
+              Email Address
+            </label>
+            <input
+              type="email"
+              value={memberEmail}
+              onChange={(e) => setMemberEmail(e.target.value)}
+              placeholder="e.g., sarah@example.com"
+              style={{
+                width: '100%',
+                padding: '0.75rem',
+                backgroundColor: '#3A1A1A',
+                border: '2px solid #A68C2C',
+                borderRadius: '4px',
+                color: '#ffffff',
+                fontSize: '14px',
+                boxSizing: 'border-box'
+              }}
+            />
+          </div>
+
+          <button
+            type="submit"
+            style={{
+              padding: '0.75rem',
+              backgroundColor: '#5A2020',
+              border: '2px solid #A68C2C',
+              color: '#A68C2C',
+              fontSize: '14px',
+              fontWeight: 600,
+              borderRadius: '4px',
+              cursor: 'pointer',
+              transition: 'background-color 0.2s ease'
+            }}
+            onMouseEnter={(e) => e.target.style.backgroundColor = '#6B2C2C'}
+            onMouseLeave={(e) => e.target.style.backgroundColor = '#5A2020'}
+          >
+            Add Member
+          </button>
         </form>
 
         {/* Members List */}
-        <div className="space-y-4">
-          <h2 className="text-xl font-bold text-[#A68C2C] mb-4">
+        <div style={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '0.5rem'
+        }}>
+          <h2 style={{
+            fontSize: '16px',
+            fontWeight: 600,
+            color: '#A68C2C',
+            margin: 0,
+            marginBottom: '0.5rem'
+          }}>
             Members ({members.length})
           </h2>
 
           {members.length === 0 ? (
-            <div className="text-center py-12 text-gray-400">
-              <p>No members added yet</p>
-              <p className="text-sm mt-2">Add a member above to get started</p>
+            <div style={{
+              padding: '2rem',
+              textAlign: 'center',
+              color: '#888888',
+              fontSize: '14px'
+            }}>
+              No members added yet. Add one above!
             </div>
           ) : (
             members.map((member) => (
               <div
                 key={member.id}
-                className="w-full p-4 bg-[#5A2020] border-2 border-[#A68C2C] rounded-lg flex justify-between items-start"
+                style={{
+                  display: 'flex',
+                  gap: '10px',
+                  alignItems: 'center'
+                }}
               >
-                <div className="flex-1">
-                  <div className="text-white font-semibold text-lg">{member.name}</div>
-                  <div className="text-gray-300 text-sm mt-1">{member.email}</div>
+                {/* Member Rectangle - 60px tall */}
+                <div
+                  style={{
+                    flex: 1,
+                    height: '60px',
+                    backgroundColor: '#5A2020',
+                    border: '2px solid #A68C2C',
+                    borderRadius: '4px',
+                    padding: '1rem',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'center'
+                  }}
+                >
+                  <div style={{
+                    color: '#A68C2C',
+                    fontWeight: 600,
+                    fontSize: '14px',
+                    marginBottom: '0.25rem'
+                  }}>
+                    {member.name}
+                  </div>
+                  <div style={{
+                    color: '#888888',
+                    fontSize: '12px'
+                  }}>
+                    {member.email}
+                  </div>
                 </div>
 
+                {/* Delete X Button - Square 60×60 */}
                 <button
                   onClick={() => setDeleteConfirm(member.id)}
-                  className="ml-4 px-3 py-1 bg-red-900 text-red-200 hover:bg-red-800 border border-red-700 rounded transition-colors text-sm font-semibold"
+                  style={{
+                    width: '60px',
+                    height: '60px',
+                    backgroundColor: '#3A1A1A',
+                    border: '2px solid #A68C2C',
+                    borderRadius: '4px',
+                    color: '#A68C2C',
+                    fontSize: '20px',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0,
+                    transition: 'background-color 0.2s ease'
+                  }}
+                  onMouseEnter={(e) => e.target.style.backgroundColor = '#6B2C2C'}
+                  onMouseLeave={(e) => e.target.style.backgroundColor = '#3A1A1A'}
                 >
-                  Delete
+                  ✕
                 </button>
               </div>
             ))
           )}
         </div>
+      </main>
 
-        {/* Delete Confirmation Dialog */}
-        {deleteConfirm && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-            <div className="bg-[#5A2020] border-2 border-[#A68C2C] rounded-lg p-6 max-w-sm">
-              <h3 className="text-xl font-bold text-[#A68C2C] mb-4">
-                Delete Member?
-              </h3>
-              <p className="text-gray-300 mb-6">
-                Are you sure you want to delete this member? This action cannot be undone.
-              </p>
-              <div className="flex gap-4">
-                <button
-                  onClick={() => setDeleteConfirm(null)}
-                  className="flex-1 px-4 py-2 border-2 border-[#A68C2C] text-[#A68C2C] rounded hover:bg-[#4A1A1A] transition-colors font-semibold"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={() => handleDeleteMember(deleteConfirm)}
-                  className="flex-1 px-4 py-2 bg-red-900 text-red-200 hover:bg-red-800 border-2 border-red-700 rounded transition-colors font-semibold"
-                >
-                  Delete
-                </button>
-              </div>
+      {/* Delete Confirmation Dialog */}
+      {deleteConfirm && (
+        <div style={{
+          position: 'fixed',
+          inset: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '1rem',
+          zIndex: 50
+        }}>
+          <div style={{
+            backgroundColor: '#5A2020',
+            border: '2px solid #A68C2C',
+            borderRadius: '4px',
+            padding: '1.5rem',
+            maxWidth: '400px',
+            color: '#A68C2C'
+          }}>
+            <h3 style={{
+              fontSize: '18px',
+              fontWeight: 600,
+              margin: '0 0 1rem 0'
+            }}>
+              Delete Member?
+            </h3>
+            <p style={{
+              color: '#888888',
+              marginBottom: '1.5rem',
+              fontSize: '14px'
+            }}>
+              Are you sure? This action cannot be undone.
+            </p>
+            <div style={{
+              display: 'flex',
+              gap: '1rem'
+            }}>
+              <button
+                onClick={() => setDeleteConfirm(null)}
+                style={{
+                  flex: 1,
+                  padding: '0.75rem',
+                  backgroundColor: '#5A2020',
+                  border: '2px solid #A68C2C',
+                  borderRadius: '4px',
+                  color: '#A68C2C',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  transition: 'background-color 0.2s ease'
+                }}
+                onMouseEnter={(e) => e.target.style.backgroundColor = '#6B2C2C'}
+                onMouseLeave={(e) => e.target.style.backgroundColor = '#5A2020'}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => handleDeleteMember(deleteConfirm)}
+                style={{
+                  flex: 1,
+                  padding: '0.75rem',
+                  backgroundColor: '#3A1A1A',
+                  border: '2px solid #A68C2C',
+                  borderRadius: '4px',
+                  color: '#A68C2C',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  transition: 'background-color 0.2s ease'
+                }}
+                onMouseEnter={(e) => e.target.style.backgroundColor = '#6B2C2C'}
+                onMouseLeave={(e) => e.target.style.backgroundColor = '#3A1A1A'}
+              >
+                Delete
+              </button>
             </div>
           </div>
-        )}
-
-        {/* Back Button */}
-        <div className="mt-12 flex justify-between">
-          <button
-            onClick={() => navigate(`/project/${projectId}/details`)}
-            className="px-8 py-3 border-2 border-[#A68C2C] text-[#A68C2C] rounded hover:bg-[#5A2020] transition-colors font-bold"
-          >
-            ← Back
-          </button>
         </div>
-      </div>
+      )}
+
+      {/* Footer - Back & Logout */}
+      <AppFooter backTo={`/project/${projectId}/details`} showLogout={true} />
     </div>
   );
 }
