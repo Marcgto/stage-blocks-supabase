@@ -2,7 +2,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 
-export default function StageDirectionsPage() {
+export default function BlocksPage() {
   const { projectId } = useParams();
   const navigate = useNavigate();
   const [project, setProject] = useState(null);
@@ -58,7 +58,7 @@ export default function StageDirectionsPage() {
           color: '#A68C2C',
           margin: 0
         }}>
-          Stage Directions
+          Blocks
         </h1>
       </header>
 
@@ -79,7 +79,7 @@ export default function StageDirectionsPage() {
           maxWidth: '500px'
         }}>
           <p style={{ color: '#A68C2C', fontSize: '16px' }}>
-            Stage Directions
+            Blocks
           </p>
           <p style={{ color: '#A68C2C', fontSize: '14px', opacity: 0.8 }}>
             Coming soon - Build complete project first

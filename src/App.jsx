@@ -5,7 +5,14 @@ import LoginPage from './pages/LoginPage';
 import ProjectSelectorPage from './pages/ProjectSelectorPage';
 import MainMenuPage from './pages/MainMenuPage';
 import ProjectDetailsPage from './pages/ProjectDetailsPage';
+import CharacterSetupPage from './pages/CharacterSetupPage';
+import MembersSetupPage from './pages/MembersSetupPage';
+import ScenesSetupPage from './pages/ScenesSetupPage';
+import BlocksPage from './pages/BlocksPage';
+import FullScriptPage from './pages/FullScriptPage';
 import ActorViewPage from './pages/ActorViewPage';
+
+
 
 export default function App() {
   const [session, setSession] = useState(null);
@@ -74,6 +81,11 @@ export default function App() {
             <Route path="/" element={<ProjectSelectorPage />} />
             <Route path="/project/:projectId" element={<MainMenuPage />} />
             <Route path="/project/:projectId/details" element={<ProjectDetailsPage />} />
+            <Route path="/project/:projectId/characters" element={<CharacterSetupPage />} />
+            <Route path="/project/:projectId/members" element={<MembersSetupPage />} />
+            <Route path="/project/:projectId/scenes" element={<ScenesSetupPage />} />
+            <Route path="/project/:projectId/blocks" element={<BlocksPage />} />
+            <Route path="/project/:projectId/full-script" element={<FullScriptPage />} />
             <Route path="/actor" element={<ActorViewPage />} />
             <Route path="*" element={<Navigate to="/" />} />
           </>
