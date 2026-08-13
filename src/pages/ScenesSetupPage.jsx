@@ -1,11 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
+import AppHeader from '../components/AppHeader';
+import PageDescriptor from '../components/PageDescriptor';
+import AppFooter from '../components/AppFooter';
 
 export default function ScenesSetupPage() {
   const { projectId } = useParams();
   const navigate = useNavigate();
   
+  const [project, setProject] = useState(null);
   const [scenes, setScenes] = useState([]);
   const [sceneName, setSceneName] = useState('');
   const [sceneScript, setSceneScript] = useState('');
@@ -13,11 +17,25 @@ export default function ScenesSetupPage() {
   const [error, setError] = useState('');
   const [deleteConfirm, setDeleteConfirm] = useState(null);
   const [expandedScene, setExpandedScene] = useState(null);
+  const [draggedScene, setDraggedScene] = useState(null);
 
-  // Fetch scenes on load
   useEffect(() => {
+    loadProject();
     fetchScenes();
   }, [projectId]);
+
+  const loadProject = async () => {
+    const { data, error } = await supabase
+      .from('projects')
+      .select('*')
+      .eq('id', projectId)
+      .single();
+
+    if (!error) {
+      setProject(data);
+    }
+    setLoading(false);
+  };
 
   const fetchScenes = async () => {
     try {
@@ -48,10 +66,6 @@ export default function ScenesSetupPage() {
     }
 
     try {
-      // Get the current user from auth
-      const { data: { user }, error: userError } = await supabase.auth.getUser();
-      if (userError || !user) throw new Error('Not authenticated');
-
       // Calculate sequence (add to end)
       const maxSequence = scenes.length > 0 
         ? Math.max(...scenes.map(s => s.sequence || 0))
@@ -62,7 +76,6 @@ export default function ScenesSetupPage() {
         .insert([
           {
             project_id: projectId,
-            user_id: user.id,
             name: sceneName.trim(),
             script_text: sceneScript.trim(),
             sequence: maxSequence + 1
@@ -101,169 +114,404 @@ export default function ScenesSetupPage() {
     }
   };
 
+  const handleDragStart = (e, scene) => {
+    setDraggedScene(scene);
+    e.dataTransfer.effectAllowed = 'move';
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+  };
+
+  const handleDrop = async (e, targetScene) => {
+    e.preventDefault();
+    
+    if (!draggedScene || draggedScene.id === targetScene.id) {
+      setDraggedScene(null);
+      return;
+    }
+
+    try {
+      // Create new array with reordered scenes
+      const newScenes = [...scenes];
+      const draggedIndex = newScenes.findIndex(s => s.id === draggedScene.id);
+      const targetIndex = newScenes.findIndex(s => s.id === targetScene.id);
+
+      // Reorder locally
+      const [removed] = newScenes.splice(draggedIndex, 1);
+      newScenes.splice(targetIndex, 0, removed);
+
+      // Update sequences
+      const updates = newScenes.map((scene, index) => ({
+        id: scene.id,
+        sequence: index + 1
+      }));
+
+      // Update in Supabase
+      for (const update of updates) {
+        await supabase
+          .from('scenes')
+          .update({ sequence: update.sequence })
+          .eq('id', update.id);
+      }
+
+      setScenes(newScenes);
+      setDraggedScene(null);
+    } catch (err) {
+      console.error('Error reordering scenes:', err);
+      setError('Failed to reorder scenes');
+    }
+  };
+
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#4A1A1A] text-white flex items-center justify-center">
-        <p className="text-lg">Loading scenes...</p>
+      <div style={{
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: '#4A1A1A'
+      }}>
+        <p style={{ color: '#A68C2C', fontSize: '18px' }}>Loading...</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#4A1A1A] text-white p-6">
-      <div className="max-w-2xl mx-auto">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-[#A68C2C] mb-2">Scenes</h1>
-          <p className="text-gray-300">Create scenes and add script text</p>
+    <div style={{
+      minHeight: '100vh',
+      backgroundColor: '#4A1A1A',
+      padding: '1rem',
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center'
+    }}>
+      {/* Header */}
+      <AppHeader projectName={project?.name} />
+
+      {/* Page Descriptor */}
+      <PageDescriptor description="Create all scenes and paste your script. You will be able to split scenes into blocks afterwards." />
+
+      {/* Error message */}
+      {error && (
+        <div style={{
+          width: '460px',
+          marginBottom: '1rem',
+          padding: '1rem',
+          backgroundColor: '#3A1A1A',
+          border: '2px solid #A32D2D',
+          borderRadius: '4px',
+          color: '#A32D2D',
+          fontSize: '14px'
+        }}>
+          {error}
         </div>
+      )}
 
-        {/* Error message */}
-        {error && (
-          <div className="mb-6 p-4 bg-red-900 border-2 border-red-700 rounded-lg text-red-100">
-            {error}
-          </div>
-        )}
-
+      {/* Main content */}
+      <main style={{
+        flex: 1,
+        width: '100%',
+        maxWidth: '460px',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '1.5rem'
+      }}>
         {/* Add Scene Form */}
-        <form onSubmit={handleAddScene} className="mb-8 p-6 bg-[#5A2020] rounded-lg border-2 border-[#A68C2C]">
-          <h2 className="text-xl font-bold text-[#A68C2C] mb-4">Add New Scene</h2>
-          
-          <div className="space-y-4">
-            <div>
-              <label className="block text-[#A68C2C] font-semibold mb-2">
-                Scene Name
-              </label>
-              <input
-                type="text"
-                value={sceneName}
-                onChange={(e) => setSceneName(e.target.value)}
-                placeholder="e.g., You'll Be Back"
-                className="w-full px-4 py-2 bg-[#3A1A1A] border-2 border-[#A68C2C] text-white placeholder-gray-500 rounded-lg focus:outline-none focus:border-[#D4A574]"
-              />
-            </div>
+        <form onSubmit={handleAddScene} style={{
+          backgroundColor: '#5A2020',
+          border: '2px solid #A68C2C',
+          borderRadius: '4px',
+          padding: '1.5rem',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '1rem'
+        }}>
+          <h2 style={{
+            fontSize: '18px',
+            fontWeight: 600,
+            color: '#A68C2C',
+            margin: 0
+          }}>
+            Add New Scene
+          </h2>
 
-            <div>
-              <label className="block text-[#A68C2C] font-semibold mb-2">
-                Script Text (Optional)
-              </label>
-              <textarea
-                value={sceneScript}
-                onChange={(e) => setSceneScript(e.target.value)}
-                placeholder="Paste your script or lyrics here..."
-                rows="6"
-                className="w-full px-4 py-2 bg-[#3A1A1A] border-2 border-[#A68C2C] text-white placeholder-gray-500 rounded-lg focus:outline-none focus:border-[#D4A574] resize-none"
-              />
-            </div>
-
-            <button
-              type="submit"
-              className="w-full py-3 bg-[#A68C2C] text-[#4A1A1A] font-bold rounded-lg hover:bg-[#D4A574] transition-colors"
-            >
-              Add Scene
-            </button>
+          <div>
+            <label style={{
+              display: 'block',
+              color: '#A68C2C',
+              fontWeight: 600,
+              marginBottom: '0.5rem',
+              fontSize: '14px'
+            }}>
+              Scene Name
+            </label>
+            <input
+              type="text"
+              value={sceneName}
+              onChange={(e) => setSceneName(e.target.value)}
+              placeholder="e.g., You'll Be Back"
+              style={{
+                width: '100%',
+                padding: '0.75rem',
+                backgroundColor: '#3A1A1A',
+                border: '2px solid #A68C2C',
+                borderRadius: '4px',
+                color: '#ffffff',
+                fontSize: '14px',
+                boxSizing: 'border-box'
+              }}
+            />
           </div>
+
+          <div>
+            <label style={{
+              display: 'block',
+              color: '#A68C2C',
+              fontWeight: 600,
+              marginBottom: '0.5rem',
+              fontSize: '14px'
+            }}>
+              Script Text (Optional)
+            </label>
+            <textarea
+              value={sceneScript}
+              onChange={(e) => setSceneScript(e.target.value)}
+              placeholder="Paste your script or lyrics here..."
+              rows="6"
+              style={{
+                width: '100%',
+                padding: '0.75rem',
+                backgroundColor: '#3A1A1A',
+                border: '2px solid #A68C2C',
+                borderRadius: '4px',
+                color: '#ffffff',
+                fontSize: '14px',
+                boxSizing: 'border-box',
+                resize: 'none'
+              }}
+            />
+          </div>
+
+          <button
+            type="submit"
+            style={{
+              padding: '0.75rem',
+              backgroundColor: '#5A2020',
+              border: '2px solid #A68C2C',
+              color: '#A68C2C',
+              fontSize: '14px',
+              fontWeight: 600,
+              borderRadius: '4px',
+              cursor: 'pointer',
+              transition: 'background-color 0.2s ease'
+            }}
+            onMouseEnter={(e) => e.target.style.backgroundColor = '#6B2C2C'}
+            onMouseLeave={(e) => e.target.style.backgroundColor = '#5A2020'}
+          >
+            Add Scene
+          </button>
         </form>
 
         {/* Scenes List */}
-        <div className="space-y-4">
-          <h2 className="text-xl font-bold text-[#A68C2C] mb-4">
+        <div style={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '0.5rem'
+        }}>
+          <h2 style={{
+            fontSize: '16px',
+            fontWeight: 600,
+            color: '#A68C2C',
+            margin: 0,
+            marginBottom: '0.5rem'
+          }}>
             Scenes ({scenes.length})
           </h2>
 
           {scenes.length === 0 ? (
-            <div className="text-center py-12 text-gray-400">
-              <p>No scenes added yet</p>
-              <p className="text-sm mt-2">Add a scene above to get started</p>
+            <div style={{
+              padding: '2rem',
+              textAlign: 'center',
+              color: '#888888',
+              fontSize: '14px'
+            }}>
+              No scenes added yet. Add one above!
             </div>
           ) : (
             scenes.map((scene) => (
               <div
                 key={scene.id}
-                className="w-full bg-[#5A2020] border-2 border-[#A68C2C] rounded-lg overflow-hidden"
+                draggable
+                onDragStart={(e) => handleDragStart(e, scene)}
+                onDragOver={handleDragOver}
+                onDrop={(e) => handleDrop(e, scene)}
+                style={{
+                  display: 'flex',
+                  gap: '10px',
+                  alignItems: 'flex-start',
+                  opacity: draggedScene?.id === scene.id ? 0.5 : 1,
+                  transition: 'opacity 0.2s ease'
+                }}
               >
-                {/* Scene Header (always visible) */}
-                <div className="p-4 flex justify-between items-center cursor-pointer hover:bg-[#6B2C2C] transition-colors"
-                  onClick={() => setExpandedScene(expandedScene === scene.id ? null : scene.id)}>
-                  <div className="flex-1">
-                    <div className="text-white font-semibold text-lg">{scene.name}</div>
-                    {scene.script_text && (
-                      <div className="text-gray-400 text-sm mt-1">
-                        {scene.script_text.length} characters
-                      </div>
-                    )}
+                {/* Scene Rectangle - Expands to show script */}
+                <div
+                  draggable={false}
+                  onClick={() => setExpandedScene(expandedScene === scene.id ? null : scene.id)}
+                  style={{
+                    flex: 1,
+                    minHeight: '60px',
+                    backgroundColor: '#5A2020',
+                    border: '2px solid #A68C2C',
+                    borderRadius: '4px',
+                    padding: '1rem',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'center',
+                    cursor: 'pointer',
+                    transition: 'background-color 0.2s ease'
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#6B2C2C'}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#5A2020'}
+                >
+                  <div style={{
+                    color: '#A68C2C',
+                    fontWeight: 600,
+                    fontSize: '14px',
+                    marginBottom: expandedScene === scene.id ? '0.5rem' : 0
+                  }}>
+                    {scene.name}
                   </div>
 
-                  <div className="flex items-center gap-2 ml-4">
-                    <span className="text-[#A68C2C] text-sm">
-                      {expandedScene === scene.id ? '▼' : '▶'}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Expanded Script Text */}
-                {expandedScene === scene.id && scene.script_text && (
-                  <div className="border-t-2 border-[#A68C2C] p-4 bg-[#4A1A1A]">
-                    <div className="text-gray-200 whitespace-pre-wrap text-sm mb-4 max-h-48 overflow-y-auto">
+                  {/* Expanded Script Text */}
+                  {expandedScene === scene.id && scene.script_text && (
+                    <div style={{
+                      color: '#888888',
+                      whiteSpace: 'pre-wrap',
+                      fontSize: '12px',
+                      marginTop: '1rem',
+                      paddingTop: '1rem',
+                      borderTop: '1px solid #A68C2C',
+                      maxHeight: '200px',
+                      overflowY: 'auto'
+                    }}>
                       {scene.script_text}
                     </div>
-                  </div>
-                )}
+                  )}
+                </div>
 
-                {/* Delete Button */}
-                {expandedScene === scene.id && (
-                  <div className="border-t-2 border-[#A68C2C] p-4 bg-[#4A1A1A] flex justify-end">
-                    <button
-                      onClick={() => setDeleteConfirm(scene.id)}
-                      className="px-4 py-2 bg-red-900 text-red-200 hover:bg-red-800 border border-red-700 rounded transition-colors font-semibold"
-                    >
-                      Delete Scene
-                    </button>
-                  </div>
-                )}
+                {/* Delete X Button - Square 60×60, Fixed Position */}
+                <button
+                  onClick={() => setDeleteConfirm(scene.id)}
+                  style={{
+                    width: '60px',
+                    height: '60px',
+                    backgroundColor: '#3A1A1A',
+                    border: '2px solid #A68C2C',
+                    borderRadius: '4px',
+                    color: '#A68C2C',
+                    fontSize: '20px',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0,
+                    transition: 'background-color 0.2s ease'
+                  }}
+                  onMouseEnter={(e) => e.target.style.backgroundColor = '#6B2C2C'}
+                  onMouseLeave={(e) => e.target.style.backgroundColor = '#3A1A1A'}
+                >
+                  ✕
+                </button>
               </div>
             ))
           )}
         </div>
+      </main>
 
-        {/* Delete Confirmation Dialog */}
-        {deleteConfirm && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-            <div className="bg-[#5A2020] border-2 border-[#A68C2C] rounded-lg p-6 max-w-sm">
-              <h3 className="text-xl font-bold text-[#A68C2C] mb-4">
-                Delete Scene?
-              </h3>
-              <p className="text-gray-300 mb-6">
-                Are you sure you want to delete this scene? This action cannot be undone.
-              </p>
-              <div className="flex gap-4">
-                <button
-                  onClick={() => setDeleteConfirm(null)}
-                  className="flex-1 px-4 py-2 border-2 border-[#A68C2C] text-[#A68C2C] rounded hover:bg-[#4A1A1A] transition-colors font-semibold"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={() => handleDeleteScene(deleteConfirm)}
-                  className="flex-1 px-4 py-2 bg-red-900 text-red-200 hover:bg-red-800 border-2 border-red-700 rounded transition-colors font-semibold"
-                >
-                  Delete
-                </button>
-              </div>
+      {/* Delete Confirmation Dialog */}
+      {deleteConfirm && (
+        <div style={{
+          position: 'fixed',
+          inset: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '1rem',
+          zIndex: 50
+        }}>
+          <div style={{
+            backgroundColor: '#5A2020',
+            border: '2px solid #A68C2C',
+            borderRadius: '4px',
+            padding: '1.5rem',
+            maxWidth: '400px',
+            color: '#A68C2C'
+          }}>
+            <h3 style={{
+              fontSize: '18px',
+              fontWeight: 600,
+              margin: '0 0 1rem 0'
+            }}>
+              Delete Scene?
+            </h3>
+            <p style={{
+              color: '#888888',
+              marginBottom: '1.5rem',
+              fontSize: '14px'
+            }}>
+              Are you sure? This action cannot be undone.
+            </p>
+            <div style={{
+              display: 'flex',
+              gap: '1rem'
+            }}>
+              <button
+                onClick={() => setDeleteConfirm(null)}
+                style={{
+                  flex: 1,
+                  padding: '0.75rem',
+                  backgroundColor: '#5A2020',
+                  border: '2px solid #A68C2C',
+                  borderRadius: '4px',
+                  color: '#A68C2C',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  transition: 'background-color 0.2s ease'
+                }}
+                onMouseEnter={(e) => e.target.style.backgroundColor = '#6B2C2C'}
+                onMouseLeave={(e) => e.target.style.backgroundColor = '#5A2020'}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => handleDeleteScene(deleteConfirm)}
+                style={{
+                  flex: 1,
+                  padding: '0.75rem',
+                  backgroundColor: '#3A1A1A',
+                  border: '2px solid #A68C2C',
+                  borderRadius: '4px',
+                  color: '#A68C2C',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  transition: 'background-color 0.2s ease'
+                }}
+                onMouseEnter={(e) => e.target.style.backgroundColor = '#6B2C2C'}
+                onMouseLeave={(e) => e.target.style.backgroundColor = '#3A1A1A'}
+              >
+                Delete
+              </button>
             </div>
           </div>
-        )}
-
-        {/* Back Button */}
-        <div className="mt-12 flex justify-between">
-          <button
-            onClick={() => navigate(`/project/${projectId}/details`)}
-            className="px-8 py-3 border-2 border-[#A68C2C] text-[#A68C2C] rounded hover:bg-[#5A2020] transition-colors font-bold"
-          >
-            ← Back
-          </button>
         </div>
-      </div>
+      )}
+
+      {/* Footer - Back & Logout */}
+      <AppFooter backTo={`/project/${projectId}/details`} showLogout={true} />
     </div>
   );
 }

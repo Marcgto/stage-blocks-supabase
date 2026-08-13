@@ -17,6 +17,7 @@ export default function CharacterSetupPage() {
   const [error, setError] = useState('');
   const [deleteConfirm, setDeleteConfirm] = useState(null);
   const [hasEnsemble, setHasEnsemble] = useState(false);
+  const [hoveredChip, setHoveredChip] = useState(null);
 
   useEffect(() => {
     loadProject();
@@ -41,7 +42,7 @@ export default function CharacterSetupPage() {
     try {
       const { data, error: fetchError } = await supabase
         .from('characters')
-        .select('*')
+        .select('*, assigned_member:project_members(id, name)')
         .eq('project_id', projectId)
         .order('sequence', { ascending: true });
 
@@ -139,8 +140,6 @@ export default function CharacterSetupPage() {
 
   const handleDeleteCharacter = async (characterId) => {
     try {
-      const charToDelete = characters.find(c => c.id === characterId);
-      
       const { error: deleteError } = await supabase
         .from('characters')
         .delete()
@@ -165,11 +164,47 @@ export default function CharacterSetupPage() {
 
   const handleAssignMember = async (characterId, memberId) => {
     try {
-      // For now, just log - this will be enhanced later for actual assignment logic
-      console.log(`Assigning member ${memberId} to character ${characterId}`);
+      const { error: updateError } = await supabase
+        .from('characters')
+        .update({ assigned_member_id: memberId })
+        .eq('id', characterId);
+
+      if (updateError) throw updateError;
+
+      // Update local state
+      const updatedCharacters = characters.map(c => 
+        c.id === characterId 
+          ? { ...c, assigned_member_id: memberId, assigned_member: members.find(m => m.id === memberId) }
+          : c
+      );
+      setCharacters(updatedCharacters);
+      setError('');
     } catch (err) {
       console.error('Error assigning member:', err);
       setError('Failed to assign member');
+    }
+  };
+
+  const handleUnassignMember = async (characterId) => {
+    try {
+      const { error: updateError } = await supabase
+        .from('characters')
+        .update({ assigned_member_id: null })
+        .eq('id', characterId);
+
+      if (updateError) throw updateError;
+
+      // Update local state
+      const updatedCharacters = characters.map(c => 
+        c.id === characterId 
+          ? { ...c, assigned_member_id: null, assigned_member: null }
+          : c
+      );
+      setCharacters(updatedCharacters);
+      setError('');
+    } catch (err) {
+      console.error('Error unassigning member:', err);
+      setError('Failed to unassign member');
     }
   };
 
@@ -360,11 +395,11 @@ export default function CharacterSetupPage() {
                   alignItems: 'center'
                 }}
               >
-                {/* Character Rectangle - 70px tall */}
+                {/* Character Card - Default 60px, stretches if needed */}
                 <div
                   style={{
                     flex: 1,
-                    height: '70px',
+                    minHeight: '60px',
                     backgroundColor: '#5A2020',
                     border: '2px solid #A68C2C',
                     borderRadius: '4px',
@@ -372,19 +407,80 @@ export default function CharacterSetupPage() {
                     display: 'flex',
                     flexDirection: 'column',
                     justifyContent: 'center',
-                    gap: '0.5rem'
+                    gap: '0.5rem',
+                    position: 'relative'
                   }}
                 >
+                  {/* Name + Chip Container */}
                   <div style={{
-                    color: '#A68C2C',
-                    fontWeight: 600,
-                    fontSize: '14px'
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: '0.5rem'
                   }}>
-                    {character.name}
+                    <div style={{
+                      color: '#A68C2C',
+                      fontWeight: 600,
+                      fontSize: '14px',
+                      flex: 1
+                    }}>
+                      {character.name}
+                    </div>
+
+                    {/* Show Chip if member assigned (NO Ensemble) */}
+                    {character.assigned_member_id && character.name.toLowerCase() !== 'ensemble' && (
+                      <div
+                        onMouseEnter={() => setHoveredChip(character.id)}
+                        onMouseLeave={() => setHoveredChip(null)}
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '0.35rem',
+                          backgroundColor: '#3A1A1A',
+                          border: '1px solid #A68C2C',
+                          borderRadius: '20px',
+                          padding: '0.35rem 0.75rem',
+                          whiteSpace: 'nowrap',
+                          flexShrink: 0
+                        }}
+                      >
+                        <span style={{
+                          color: '#A68C2C',
+                          fontSize: '12px',
+                          fontWeight: 500
+                        }}>
+                          {character.assigned_member?.name}
+                        </span>
+
+                        {/* X Button - Show on hover */}
+                        {hoveredChip === character.id && (
+                          <button
+                            onClick={() => handleUnassignMember(character.id)}
+                            style={{
+                              background: 'none',
+                              border: 'none',
+                              color: '#A68C2C',
+                              cursor: 'pointer',
+                              fontSize: '14px',
+                              fontWeight: 600,
+                              padding: '0',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              width: '16px',
+                              height: '16px',
+                              marginLeft: '0.25rem'
+                            }}
+                          >
+                            ✕
+                          </button>
+                        )}
+                      </div>
+                    )}
                   </div>
 
-                  {/* Member Dropdown - NOT shown for Ensemble */}
-                  {character.name.toLowerCase() !== 'ensemble' && (
+                  {/* Member Dropdown - NOT shown for Ensemble and NOT shown if member already assigned */}
+                  {character.name.toLowerCase() !== 'ensemble' && !character.assigned_member_id && (
                     <select
                       onChange={(e) => {
                         if (e.target.value) {
@@ -399,8 +495,7 @@ export default function CharacterSetupPage() {
                         borderRadius: '2px',
                         color: '#888888',
                         fontSize: '12px',
-                        cursor: 'pointer',
-                        marginTop: '-2px'
+                        cursor: 'pointer'
                       }}
                     >
                       <option value="">Assign member...</option>
@@ -413,12 +508,12 @@ export default function CharacterSetupPage() {
                   )}
                 </div>
 
-                {/* Delete X Button - Square 70×70 */}
+                {/* Delete X Button - Square 60×60 */}
                 <button
                   onClick={() => setDeleteConfirm(character.id)}
                   style={{
-                    width: '70px',
-                    height: '70px',
+                    width: '60px',
+                    height: '60px',
                     backgroundColor: '#3A1A1A',
                     border: '2px solid #A68C2C',
                     borderRadius: '4px',
