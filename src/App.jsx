@@ -73,7 +73,9 @@ function AppContent() {
         <Route path="/login" element={user ? <Navigate to="/dashboard" /> : <LoginPage />} />
 
         {/* Protected routes - all wrapped in DashboardLayout with persistent Sidebar */}
-        {user ? (
+        {user === undefined ? (
+          <Route path="*" element={<div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', backgroundColor: '#F5F5F5', fontFamily: 'Cormorant Garamond, serif', fontSize: '18px', color: '#333333' }}>Loading your projects...</div>} />
+        ) : user ? (
           <Route element={<DashboardLayout />}>
             <Route path="/dashboard" element={<WrappedDashboard />} />
             <Route path="/projects" element={<WrappedProjectSelector />} />
