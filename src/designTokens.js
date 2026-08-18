@@ -14,6 +14,12 @@ export const colors = {
   sidebarText: '#FFFFFF',      // White text on sidebar
   sidebarHover: '#916B7B',     // Slightly darker on hover
 
+  // NEW BURGUNDY PALETTE (for SubHeader, cards, blocks)
+  darkBurgundy: '#4A1A1A',     // Dark burgundy - For titles of cards/blocks, borders
+  burgundy: '#5A2020',         // Burgundy - For sub/header link text
+  veryDarkBurgundy: '#3A1A1A', // Very dark burgundy - (unused for now)
+  lightBurgundy: '#6B2C2C',    // Light burgundy - (unused for now)
+
   // CARDS
   cardBg: '#FFFFFF',           // White card background
   cardBorder: '#8B5A5A',       // Burgundy border
@@ -55,6 +61,11 @@ export const castColors = [
   colors.castColor21, colors.castColor22, colors.castColor23, colors.castColor24,
 ];
 
+export const fonts = {
+  primary: "'Cormorant Garamond', serif",  // Headers, main branding
+  secondary: "'Kumbh Sans', sans-serif",   // Sidebar menus, subheaders, tabs
+};
+
 export const spacing = {
   xs: '0.5rem', sm: '1rem', md: '1.5rem', lg: '2rem', xl: '3rem',
 };
@@ -68,9 +79,6 @@ export const typography = {
   tiny: { fontSize: '12px', fontWeight: 400, lineHeight: '1.4' },
   buttonText: { fontSize: '14px', fontWeight: 600, lineHeight: '1.4' },
   chipText: { fontSize: '13px', fontWeight: 500, lineHeight: '1.4' },
-  // Sidebar typography - increased by 4px and bold
-  sidebarMenu: { fontSize: '19px', fontWeight: 700, lineHeight: '1.4' },
-  sidebarSubmenu: { fontSize: '18px', fontWeight: 700, lineHeight: '1.4' },
 };
 
 export const borders = {
@@ -109,4 +117,4 @@ export const crewRoles = [
   'Lighting Technician', 'Sound Technician', 'Musician', 'Technician', 'Other',
 ];
 
-export default { colors, castColors, spacing, typography, borders, shadows, components, responsive, crewRoles };
+export default { colors, castColors, fonts, spacing, typography, borders, shadows, components, responsive, crewRoles };

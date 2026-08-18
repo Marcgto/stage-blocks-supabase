@@ -1,11 +1,29 @@
 import React, { useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { colors, typography, spacing } from '../../designTokens'
+import { colors, spacing, fonts } from '../../designTokens'
+import { useNavigation } from '../common/NavigationContext'
+import { sidebarConfig } from '../../sidebarConfig'
+import * as LucideIcons from 'lucide-react'
+
+// Sidebar-specific font definitions
+const SIDEBAR_FONT = fonts.secondary
+const MAIN_MENU_FONT_SIZE = '16px'
+const MAIN_MENU_FONT_WEIGHT = 100
+const SUBMENU_FONT_SIZE = '16px'
+const SUBMENU_FONT_WEIGHT = 100
+
+// Helper function to get Lucide icon by name
+const getIcon = (iconName) => {
+  if (!iconName) return null
+  const IconComponent = LucideIcons[iconName]
+  return IconComponent || null
+}
 
 const Sidebar = ({ items = [] }) => {
   const navigate = useNavigate()
   const location = useLocation()
   const [expandedMenu, setExpandedMenu] = useState(null)
+  const { setActiveMenu } = useNavigation()
 
   // Determine which menu should be expanded based on current path
   const getMenuForPath = (pathname) => {
@@ -39,7 +57,11 @@ const Sidebar = ({ items = [] }) => {
 
   const handleMenuItemClick = (item) => {
     if (item.submenu && item.submenu.length > 0) {
+      // Items WITH submenus: toggle expand/collapse
       toggleExpanded(item.label)
+    } else if (item.path) {
+      // Items WITHOUT submenus (like Dashboard, Settings): navigate directly
+      navigate(item.path)
     }
   }
 
@@ -63,7 +85,7 @@ const Sidebar = ({ items = [] }) => {
   return (
     <div
       style={{
-        width: '260px',
+        width: '290px',
         backgroundColor: colors.sidebarBg,
         color: colors.sidebarText,
         padding: `${spacing.md} ${spacing.sm}`,
@@ -74,6 +96,35 @@ const Sidebar = ({ items = [] }) => {
         flexDirection: 'column',
       }}
     >
+      {/* Logo and Stage Blocks Title - Top of Sidebar */}
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: spacing.sm,
+          marginBottom: spacing.sm,
+          paddingBottom: spacing.sm,
+        }}
+      >
+        <span style={{ fontSize: '28px', fontWeight: 600 }}>🎭</span>
+        <span
+          style={{
+            fontFamily: "'Cormorant Garamond', serif",
+            color: colors.sidebarText,
+            margin: 0,
+            fontSize: '26px',
+            fontWeight: 600,
+            lineHeight: '1.3',
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+          }}
+        >
+          Stage Blocks
+        </span>
+      </div>
+
+      {/* Navigation Menus */}
       <nav style={{ flex: 1, listStyle: 'none', padding: 0, margin: 0 }}>
         {items.map((item) => {
           const hasSubmenu = item.submenu && item.submenu.length > 0
@@ -84,14 +135,20 @@ const Sidebar = ({ items = [] }) => {
             <div key={item.label}>
               {/* Main Menu Item */}
               <div
-                onClick={() => handleMenuItemClick(item)}
+                onClick={() => {
+                  handleMenuItemClick(item)
+                  setActiveMenu(item.label)
+                }}
                 style={{
                   padding: `${spacing.sm} ${spacing.sm}`,
-                  cursor: hasSubmenu ? 'pointer' : 'default',
+                  cursor: 'pointer',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'space-between',
-                  ...typography.sidebarMenu,
+                  fontSize: MAIN_MENU_FONT_SIZE,
+                  fontWeight: MAIN_MENU_FONT_WEIGHT,
+                  fontFamily: SIDEBAR_FONT,
+                  lineHeight: '1.5',
                   transition: 'background-color 0.2s, box-shadow 0.2s',
                   backgroundColor: menuIsActive ? 'rgba(0, 0, 0, 0.15)' : 'transparent',
                   boxShadow: menuIsActive ? 'inset 0 1px 3px rgba(0, 0, 0, 0.2)' : 'none',
@@ -107,7 +164,13 @@ const Sidebar = ({ items = [] }) => {
                   e.currentTarget.style.backgroundColor = menuIsActive ? 'rgba(0, 0, 0, 0.15)' : 'transparent'
                 }}
               >
-                <span>{item.label}</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: spacing.xs }}>
+                  {(() => {
+                    const IconComponent = getIcon(sidebarConfig[item.label])
+                    return IconComponent ? <IconComponent size={18} color={colors.sidebarText} /> : null
+                  })()}
+                  <span style={{ fontFamily: SIDEBAR_FONT, fontSize: MAIN_MENU_FONT_SIZE, fontWeight: MAIN_MENU_FONT_WEIGHT }}>{item.label}</span>
+                </div>
 
                 {/* Collapsible Arrow */}
                 {hasSubmenu && (
@@ -150,7 +213,10 @@ const Sidebar = ({ items = [] }) => {
                         style={{
                           padding: `${spacing.xs} ${spacing.xs}`,
                           cursor: 'pointer',
-                          ...typography.sidebarSubmenu,
+                          fontSize: SUBMENU_FONT_SIZE,
+                          fontWeight: SUBMENU_FONT_WEIGHT,
+                          fontFamily: SIDEBAR_FONT,
+                          lineHeight: '1.5',
                           transition: 'background-color 0.2s, box-shadow 0.2s',
                           marginBottom: '0.25rem',
                           borderRadius: '4px',
@@ -166,7 +232,13 @@ const Sidebar = ({ items = [] }) => {
                           e.currentTarget.style.backgroundColor = subIsActive ? 'rgba(0, 0, 0, 0.15)' : 'transparent'
                         }}
                       >
-                        {subitem.label}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: spacing.xs }}>
+                          {(() => {
+                            const IconComponent = getIcon(sidebarConfig[subitem.label])
+                            return IconComponent ? <IconComponent size={16} color={colors.sidebarText} /> : null
+                          })()}
+                          <span style={{ fontFamily: SIDEBAR_FONT, fontSize: SUBMENU_FONT_SIZE, fontWeight: SUBMENU_FONT_WEIGHT }}>{subitem.label}</span>
+                        </div>
                       </div>
                     )
                   })}

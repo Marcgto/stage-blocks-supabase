@@ -1,6 +1,6 @@
 import React from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { colors, spacing, typography } from '../../designTokens'
+import { colors, spacing, typography, shadows } from '../../designTokens'
 
 const Header = ({
   mobileMenuOpen,
@@ -236,64 +236,58 @@ const Header = ({
   return (
     <div
       style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
         height: '60px',
         display: 'flex',
         alignItems: 'center',
-        zIndex: 100,
         backgroundColor: colors.background,
+        borderBottom: `1px solid ${colors.sidebarBg}`,
+        paddingLeft: isMobile ? spacing.md : spacing.lg,
+        paddingRight: spacing.lg,
+        flex: '0 0 60px',
       }}
     >
-      {/* Left side: Sidebar-colored section with logo */}
-      <div
-        style={{
-          flex: '0 0 260px',
-          height: '100%',
-          backgroundColor: colors.sidebarBg,
-          display: 'flex',
-          alignItems: 'center',
-          paddingLeft: spacing.md,
-          paddingRight: spacing.md,
-          borderRight: `1px solid rgba(255, 255, 255, 0.1)`,
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', gap: spacing.sm, minWidth: 0 }}>
-          <span style={{
+      {/* Mobile: Hamburger on left */}
+      {isMobile && (
+        <button
+          onClick={onMenuToggle}
+          style={{
+            background: 'none',
+            border: 'none',
+            cursor: 'pointer',
             fontSize: '24px',
-            color: 'white',
-            fontWeight: 600,
-          }}>
-            🎭
-          </span>
-          <span style={{
-            color: colors.sidebarText,
-            ...typography.h2,
-            whiteSpace: 'nowrap',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-          }}>
+            color: colors.textPrimary,
+            padding: '4px 8px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            marginRight: spacing.md,
+          }}
+        >
+          ☰
+        </button>
+      )}
+
+      {/* Mobile: Logo and Stage Blocks title in center */}
+      {isMobile && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: spacing.sm, minWidth: 0, flex: 1 }}>
+          <span style={{ fontSize: '20px', fontWeight: 600 }}>🎭</span>
+          <span
+            style={{
+              color: colors.textPrimary,
+              fontSize: '24px',
+              fontWeight: 600,
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+            }}
+          >
             Stage Blocks
           </span>
         </div>
-      </div>
+      )}
 
-      {/* Right side: Light gray section with breadcrumbs and controls */}
-      <div
-        style={{
-          flex: 1,
-          height: '100%',
-          backgroundColor: colors.background,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          paddingLeft: spacing.lg,
-          paddingRight: spacing.lg,
-        }}
-      >
-        {/* Breadcrumbs - ENLARGED & BOLD */}
+      {/* Desktop: Breadcrumbs on left */}
+      {!isMobile && (
         <div style={{ display: 'flex', alignItems: 'center', gap: spacing.md, flex: 1, minWidth: 0 }}>
           {breadcrumbs.map((crumb, index) => (
             <div key={index} style={{ display: 'flex', alignItems: 'center', gap: spacing.md, minWidth: 0 }}>
@@ -358,90 +352,73 @@ const Header = ({
             </div>
           ))}
         </div>
+      )}
 
-        {/* Right controls */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: spacing.md, flex: '0 0 auto', marginLeft: spacing.lg }}>
-          {/* Hamburger menu for mobile */}
-          {isMobile && (
-            <button
-              onClick={onMenuToggle}
-              style={{
-                background: 'none',
-                border: 'none',
-                cursor: 'pointer',
-                fontSize: '24px',
-                color: colors.textPrimary,
-                padding: '4px 8px',
-              }}
-            >
-              ☰
-            </button>
-          )}
+      {/* Right controls (search, notifications, profile) */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: spacing.md, flex: '0 0 auto', marginLeft: isMobile ? 'auto' : spacing.lg }}>
+        {/* Search icon */}
+        <button
+          style={{
+            background: 'none',
+            border: 'none',
+            cursor: 'pointer',
+            fontSize: '18px',
+            color: colors.textMuted,
+            padding: '4px 8px',
+            transition: 'color 0.2s',
+          }}
+          onMouseEnter={(e) => e.target.style.color = colors.textPrimary}
+          onMouseLeave={(e) => e.target.style.color = colors.textMuted}
+        >
+          🔍
+        </button>
 
-          {/* Search icon */}
-          <button
-            style={{
-              background: 'none',
-              border: 'none',
-              cursor: 'pointer',
-              fontSize: '18px',
-              color: colors.textMuted,
-              padding: '4px 8px',
-              transition: 'color 0.2s',
-            }}
-            onMouseEnter={(e) => e.target.style.color = colors.textPrimary}
-            onMouseLeave={(e) => e.target.style.color = colors.textMuted}
-          >
-            🔍
-          </button>
+        {/* Notifications icon */}
+        <button
+          style={{
+            background: 'none',
+            border: 'none',
+            cursor: 'pointer',
+            fontSize: '18px',
+            color: colors.textMuted,
+            padding: '4px 8px',
+            transition: 'color 0.2s',
+          }}
+          onMouseEnter={(e) => e.target.style.color = colors.textPrimary}
+          onMouseLeave={(e) => e.target.style.color = colors.textMuted}
+        >
+          🔔
+        </button>
 
-          {/* Notifications icon */}
-          <button
-            style={{
-              background: 'none',
-              border: 'none',
-              cursor: 'pointer',
-              fontSize: '18px',
-              color: colors.textMuted,
-              padding: '4px 8px',
-              transition: 'color 0.2s',
-            }}
-            onMouseEnter={(e) => e.target.style.color = colors.textPrimary}
-            onMouseLeave={(e) => e.target.style.color = colors.textMuted}
-          >
-            🔔
-          </button>
-
-          {/* User profile icon */}
-          <button
-            style={{
-              background: 'none',
-              border: 'none',
-              cursor: 'pointer',
-              fontSize: '18px',
-              color: colors.textMuted,
-              padding: '4px 8px',
-              transition: 'color 0.2s, background-color 0.2s',
-              borderRadius: '50%',
-              width: '32px',
-              height: '32px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              backgroundColor: '#F0F0F0',
-            }}
-            onMouseEnter={(e) => {
-              e.target.style.backgroundColor = colors.button
-              e.target.style.color = '#FFFFFF'
-            }}
-            onMouseLeave={(e) => {
-              e.target.style.backgroundColor = '#F0F0F0'
-              e.target.style.color = colors.textMuted
-            }}
-          >
-            👤
-          </button>
-        </div>
+        {/* User profile icon */}
+        <button
+          style={{
+            background: 'none',
+            border: 'none',
+            cursor: 'pointer',
+            fontSize: '18px',
+            color: colors.textMuted,
+            padding: '4px 8px',
+            transition: 'color 0.2s, background-color 0.2s',
+            borderRadius: '50%',
+            width: '32px',
+            height: '32px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            backgroundColor: '#F0F0F0',
+          }}
+          onMouseEnter={(e) => {
+            e.target.style.backgroundColor = colors.button
+            e.target.style.color = '#FFFFFF'
+          }}
+          onMouseLeave={(e) => {
+            e.target.style.backgroundColor = '#F0F0F0'
+            e.target.style.color = colors.textMuted
+          }}
+        >
+          👤
+        </button>
       </div>
     </div>
   )
