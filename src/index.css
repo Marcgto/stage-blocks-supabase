@@ -1,31 +1,24 @@
 /* Import Google Fonts */
 @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Kumbh+Sans:wght@400;500;600;700&display=swap');
- 
-/* Set default fonts */
-body {
-  font-family: 'Cormorant Garamond', serif;
-}
- 
-/* Use Kumbh Sans for sidebar menus (optional global fallback) */
-[data-font="secondary"] {
-  font-family: 'Kumbh Sans', sans-serif;
-}
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 * {
-  font-family: 'Cormorant Garamond', serif;
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
+body, html {
+  font-family: 'Kumbh Sans', sans-serif;
+}
+
 body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background: #F5F5F5;
+  background: #e8e8e8;
 }
 
 html {
@@ -39,7 +32,7 @@ html {
 }
 
 ::-webkit-scrollbar-track {
-  background: #F5F5F5;
+  background: #e8e8e8;
 }
 
 ::-webkit-scrollbar-thumb {

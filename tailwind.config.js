@@ -6,11 +6,8 @@ export default {
   ],
   theme: {
     extend: {
-      fontFamily: {
-        sans: ['Cormorant Garamond', 'serif'],
-      },
       colors: {
-        stageBackground: '#F5F5F5',
+        stageBackground: '#e8e8e8',
         stageSidebar: '#A0696B',
         stageCard: '#FFFFFF',
         stageBorder: '#8B5A5A',

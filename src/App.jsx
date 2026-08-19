@@ -1,6 +1,7 @@
 import React from 'react'
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import { AppProvider, useAppContext, withProject } from './components/common/PageWrapper'
+import { colors, fonts } from './designTokens'
 import DashboardLayout from './components/layout/DashboardLayout'
 import LoginPage from './pages/LoginPage'
 import ProjectSelectorPage from './pages/ProjectSelectorPage'
@@ -74,7 +75,7 @@ function AppContent() {
 
         {/* Protected routes - all wrapped in DashboardLayout with persistent Sidebar */}
         {user === undefined ? (
-          <Route path="*" element={<div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', backgroundColor: '#F5F5F5', fontFamily: 'Cormorant Garamond, serif', fontSize: '18px', color: '#333333' }}>Loading your projects...</div>} />
+          <Route path="*" element={<div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', backgroundColor: colors.background, fontFamily: fonts.primary, fontSize: '18px', color: colors.textPrimary }}>Loading your projects...</div>} />
         ) : user ? (
           <Route element={<DashboardLayout />}>
             <Route path="/dashboard" element={<WrappedDashboard />} />

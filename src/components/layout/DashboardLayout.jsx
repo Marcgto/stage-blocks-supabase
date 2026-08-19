@@ -50,7 +50,7 @@ const DashboardLayout = () => {
           <SubHeader />
 
           {/* Content - flex: 1 (fills remaining space) */}
-          <div style={{ flex: 1, overflowY: 'auto', backgroundColor: colors.background, padding: spacing.lg }}>
+          <div style={{ flex: 1, overflowY: 'auto', backgroundColor: colors.background, padding: isMobile ? '12px' : spacing.lg }}>
             <Outlet />
           </div>
         </div>

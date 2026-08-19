@@ -5,7 +5,7 @@
 
 export const colors = {
   // PRIMARY COLORS
-  background: '#F5F5F5',      // Pale gray - main app background
+  background: '#e8e8e8',      // Pale gray - main app background
   white: '#FFFFFF',            // Card backgrounds
   black: '#333333',            // Primary text color
 
@@ -13,6 +13,18 @@ export const colors = {
   sidebarBg: '#A0696B',        // Pale burgundy sidebar
   sidebarText: '#FFFFFF',      // White text on sidebar
   sidebarHover: '#916B7B',     // Slightly darker on hover
+
+  // HEADER
+  headerBgDesktop: '#F5F5F5',  // Desktop header background (same as app background)
+  headerBgMobile: '#A0696B',   // Mobile header background (sidebar color)
+  headerTextMobile: '#FFFFFF', // Mobile header text (white)
+  headerButtonBgDesktop: '#F0F0F0', // Desktop profile button background
+  headerButtonBgMobileTransparent: 'rgba(255, 255, 255, 0.2)', // Mobile button semi-transparent
+  headerButtonBgMobileTransparentHover: 'rgba(255, 255, 255, 0.3)', // Mobile button hover
+
+  // BREADCRUMBS
+  breadcrumbActive: '#333333',   // Active breadcrumb (current page)
+  breadcrumbInactive: '#888888', // Inactive breadcrumb (links)
 
   // NEW BURGUNDY PALETTE (for SubHeader, cards, blocks)
   darkBurgundy: '#4A1A1A',     // Dark burgundy - For titles of cards/blocks, borders
@@ -62,8 +74,8 @@ export const castColors = [
 ];
 
 export const fonts = {
-  primary: "'Cormorant Garamond', serif",  // Headers, main branding
-  secondary: "'Kumbh Sans', sans-serif",   // Sidebar menus, subheaders, tabs
+  primary: "'Kumbh Sans', sans-serif",           // Main font for everything (header, sidebar, menus, tabs, content, buttons)
+  secondary: "'Cormorant Garamond', serif",      // Only for "Stage Blocks" branding text (sidebar logo area)
 };
 
 export const spacing = {

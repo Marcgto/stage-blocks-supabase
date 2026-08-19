@@ -6,7 +6,7 @@ import { sidebarConfig } from '../../sidebarConfig'
 import * as LucideIcons from 'lucide-react'
 
 // Sidebar-specific font definitions
-const SIDEBAR_FONT = fonts.secondary
+const SIDEBAR_FONT = fonts.primary
 const MAIN_MENU_FONT_SIZE = '16px'
 const MAIN_MENU_FONT_WEIGHT = 100
 const SUBMENU_FONT_SIZE = '16px'
@@ -19,7 +19,7 @@ const getIcon = (iconName) => {
   return IconComponent || null
 }
 
-const Sidebar = ({ items = [] }) => {
+const Sidebar = ({ items = [], onMenuItemClick = () => {} }) => {
   const navigate = useNavigate()
   const location = useLocation()
   const [expandedMenu, setExpandedMenu] = useState(null)
@@ -67,6 +67,7 @@ const Sidebar = ({ items = [] }) => {
 
   const handleSubmenuClick = (subitem) => {
     navigate(subitem.path)
+    onMenuItemClick() // Close mobile menu on navigation
     // Menu stays open - we DON'T toggle or close it
   }
 
@@ -232,13 +233,7 @@ const Sidebar = ({ items = [] }) => {
                           e.currentTarget.style.backgroundColor = subIsActive ? 'rgba(0, 0, 0, 0.15)' : 'transparent'
                         }}
                       >
-                        <div style={{ display: 'flex', alignItems: 'center', gap: spacing.xs }}>
-                          {(() => {
-                            const IconComponent = getIcon(sidebarConfig[subitem.label])
-                            return IconComponent ? <IconComponent size={16} color={colors.sidebarText} /> : null
-                          })()}
-                          <span style={{ fontFamily: SIDEBAR_FONT, fontSize: SUBMENU_FONT_SIZE, fontWeight: SUBMENU_FONT_WEIGHT }}>{subitem.label}</span>
-                        </div>
+                        <span style={{ fontFamily: SIDEBAR_FONT, fontSize: SUBMENU_FONT_SIZE, fontWeight: SUBMENU_FONT_WEIGHT }}>{subitem.label}</span>
                       </div>
                     )
                   })}

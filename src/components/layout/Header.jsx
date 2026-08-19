@@ -1,6 +1,7 @@
 import React from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { colors, spacing, typography, shadows } from '../../designTokens'
+import { Menu, Search, Bell, User } from 'lucide-react'
 
 const Header = ({
   mobileMenuOpen,
@@ -239,10 +240,10 @@ const Header = ({
         height: '60px',
         display: 'flex',
         alignItems: 'center',
-        backgroundColor: colors.background,
-        borderBottom: `1px solid ${colors.sidebarBg}`,
+        backgroundColor: isMobile ? colors.headerBgMobile : colors.headerBgDesktop,
+        borderBottom: `1px solid ${isMobile ? colors.headerBgMobile : colors.sidebarBg}`,
         paddingLeft: isMobile ? spacing.md : spacing.lg,
-        paddingRight: spacing.lg,
+        paddingRight: isMobile ? spacing.sm : spacing.lg,
         flex: '0 0 60px',
       }}
     >
@@ -254,16 +255,18 @@ const Header = ({
             background: 'none',
             border: 'none',
             cursor: 'pointer',
-            fontSize: '24px',
-            color: colors.textPrimary,
+            color: colors.headerTextMobile,
             padding: '4px 8px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             marginRight: spacing.md,
+            transition: 'opacity 0.2s',
           }}
+          onMouseEnter={(e) => e.currentTarget.style.opacity = '0.7'}
+          onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
         >
-          ☰
+          <Menu size={24} color={colors.headerTextMobile} />
         </button>
       )}
 
@@ -273,7 +276,7 @@ const Header = ({
           <span style={{ fontSize: '20px', fontWeight: 600 }}>🎭</span>
           <span
             style={{
-              color: colors.textPrimary,
+              color: colors.headerTextMobile,
               fontSize: '24px',
               fontWeight: 600,
               whiteSpace: 'nowrap',
@@ -308,7 +311,7 @@ const Header = ({
                   style={{
                     background: 'none',
                     border: 'none',
-                    color: crumb.isActive ? colors.textPrimary : colors.textMuted,
+                    color: crumb.isActive ? colors.breadcrumbActive : colors.breadcrumbInactive,
                     cursor: 'pointer',
                     fontSize: '18px',
                     fontWeight: crumb.isActive ? 700 : 500,
@@ -322,13 +325,13 @@ const Header = ({
                   }}
                   onMouseEnter={(e) => {
                     if (!crumb.isActive) {
-                      e.target.style.color = colors.textPrimary
+                      e.target.style.color = colors.breadcrumbActive
                       e.target.style.fontWeight = '600'
                     }
                   }}
                   onMouseLeave={(e) => {
                     if (!crumb.isActive) {
-                      e.target.style.color = colors.textMuted
+                      e.target.style.color = colors.breadcrumbInactive
                       e.target.style.fontWeight = '500'
                     }
                   }}
@@ -337,7 +340,7 @@ const Header = ({
                 </button>
               ) : (
                 <span style={{
-                  color: colors.textPrimary,
+                  color: colors.breadcrumbActive,
                   fontSize: '18px',
                   fontWeight: 700,
                   lineHeight: '1.3',
@@ -355,22 +358,30 @@ const Header = ({
       )}
 
       {/* Right controls (search, notifications, profile) */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: spacing.md, flex: '0 0 auto', marginLeft: isMobile ? 'auto' : spacing.lg }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: isMobile ? '8px' : spacing.md, flex: '0 0 auto', marginLeft: isMobile ? 'auto' : spacing.lg }}>
         {/* Search icon */}
         <button
           style={{
             background: 'none',
             border: 'none',
             cursor: 'pointer',
-            fontSize: '18px',
-            color: colors.textMuted,
-            padding: '4px 8px',
-            transition: 'color 0.2s',
+            color: isMobile ? colors.headerTextMobile : colors.sidebarBg,
+            padding: isMobile ? '2px 4px' : '4px 8px',
+            transition: 'opacity 0.2s',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
           }}
-          onMouseEnter={(e) => e.target.style.color = colors.textPrimary}
-          onMouseLeave={(e) => e.target.style.color = colors.textMuted}
+          onMouseEnter={(e) => {
+            if (!isMobile) {
+              e.currentTarget.style.opacity = '0.6'
+            } else {
+              e.currentTarget.style.opacity = '0.7'
+            }
+          }}
+          onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
         >
-          🔍
+          <Search size={18} color={isMobile ? colors.headerTextMobile : colors.sidebarBg} />
         </button>
 
         {/* Notifications icon */}
@@ -379,45 +390,59 @@ const Header = ({
             background: 'none',
             border: 'none',
             cursor: 'pointer',
-            fontSize: '18px',
-            color: colors.textMuted,
-            padding: '4px 8px',
-            transition: 'color 0.2s',
+            color: isMobile ? colors.headerTextMobile : colors.sidebarBg,
+            padding: isMobile ? '2px 4px' : '4px 8px',
+            transition: 'opacity 0.2s',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
           }}
-          onMouseEnter={(e) => e.target.style.color = colors.textPrimary}
-          onMouseLeave={(e) => e.target.style.color = colors.textMuted}
+          onMouseEnter={(e) => {
+            if (!isMobile) {
+              e.currentTarget.style.opacity = '0.6'
+            } else {
+              e.currentTarget.style.opacity = '0.7'
+            }
+          }}
+          onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
         >
-          🔔
+          <Bell size={18} color={isMobile ? colors.headerTextMobile : colors.sidebarBg} />
         </button>
 
         {/* User profile icon */}
         <button
           style={{
-            background: 'none',
+            background: isMobile ? colors.headerButtonBgMobileTransparent : colors.headerButtonBgDesktop,
             border: 'none',
             cursor: 'pointer',
-            fontSize: '18px',
-            color: colors.textMuted,
-            padding: '4px 8px',
-            transition: 'color 0.2s, background-color 0.2s',
+            color: isMobile ? colors.headerTextMobile : colors.sidebarBg,
+            padding: isMobile ? '2px 4px' : '4px 8px',
+            transition: 'background-color 0.2s, opacity 0.2s',
             borderRadius: '50%',
-            width: '32px',
-            height: '32px',
+            width: isMobile ? '28px' : '32px',
+            height: isMobile ? '28px' : '32px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            backgroundColor: '#F0F0F0',
           }}
           onMouseEnter={(e) => {
-            e.target.style.backgroundColor = colors.button
-            e.target.style.color = '#FFFFFF'
+            if (isMobile) {
+              e.currentTarget.style.backgroundColor = colors.headerButtonBgMobileTransparentHover
+            } else {
+              e.currentTarget.style.backgroundColor = '#E8E8E8'
+              e.currentTarget.style.opacity = '0.6'
+            }
           }}
           onMouseLeave={(e) => {
-            e.target.style.backgroundColor = '#F0F0F0'
-            e.target.style.color = colors.textMuted
+            if (isMobile) {
+              e.currentTarget.style.backgroundColor = colors.headerButtonBgMobileTransparent
+            } else {
+              e.currentTarget.style.backgroundColor = colors.headerButtonBgDesktop
+              e.currentTarget.style.opacity = '1'
+            }
           }}
         >
-          👤
+          <User size={18} color={isMobile ? colors.headerTextMobile : colors.sidebarBg} />
         </button>
       </div>
     </div>

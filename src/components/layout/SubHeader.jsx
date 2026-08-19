@@ -41,7 +41,7 @@ export default function SubHeader() {
                   border: 'none',
                   padding: `${spacing.sm} 0`,
                   fontSize: '15px',
-                  fontFamily: fonts.secondary,
+                  fontFamily: fonts.primary,
                   fontWeight: isActive ? 600 : 400,
                   color: isActive ? colors.sidebarBg : colors.textMuted,
                   cursor: 'pointer',
