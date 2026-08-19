@@ -35,7 +35,7 @@ const DashboardLayout = () => {
         {isMobile && mobileMenuOpen && (
           <>
             <div style={{ position: 'fixed', top: 0, left: 0, width: '290px', height: '100vh', backgroundColor: colors.sidebarBg, color: colors.sidebarText, overflowY: 'auto', zIndex: 50, boxShadow: '2px 0 6px rgba(0, 0, 0, 0.2)' }}>
-              <Sidebar items={menuConfig} />
+              <Sidebar items={menuConfig} onMenuItemClick={() => setMobileMenuOpen(false)} />
             </div>
             <div onClick={() => setMobileMenuOpen(false)} style={{ position: 'fixed', top: 0, left: '290px', right: 0, bottom: 0, backgroundColor: 'rgba(0, 0, 0, 0.3)', zIndex: 40 }} />
           </>
