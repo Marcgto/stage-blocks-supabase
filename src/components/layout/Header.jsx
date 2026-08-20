@@ -1,6 +1,6 @@
 import React from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { colors, spacing, typography, shadows } from '../../designTokens'
+import { colors, spacing, typography, shadows, fonts } from '../../designTokens'
 import { Menu, Search, Bell, User } from 'lucide-react'
 
 const Header = ({
@@ -256,11 +256,11 @@ const Header = ({
             border: 'none',
             cursor: 'pointer',
             color: colors.headerTextMobile,
-            padding: '4px 8px',
+            padding: '4px 4px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            marginRight: spacing.md,
+            marginRight: '18px',
             transition: 'opacity 0.2s',
           }}
           onMouseEnter={(e) => e.currentTarget.style.opacity = '0.7'}
@@ -270,23 +270,20 @@ const Header = ({
         </button>
       )}
 
-      {/* Mobile: Logo and Stage Blocks title in center */}
+      {/* Mobile: Stage Blocks title */}
       {isMobile && (
-        <div style={{ display: 'flex', alignItems: 'center', gap: spacing.sm, minWidth: 0, flex: 1 }}>
-          <span style={{ fontSize: '20px', fontWeight: 600 }}>🎭</span>
-          <span
-            style={{
-              color: colors.headerTextMobile,
-              fontSize: '24px',
-              fontWeight: 600,
-              whiteSpace: 'nowrap',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-            }}
-          >
-            Stage Blocks
-          </span>
-        </div>
+        <span
+          style={{
+            color: colors.headerTextMobile,
+            fontSize: '24px',
+            fontWeight: 600,
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+          }}
+        >
+          Stage Blocks
+        </span>
       )}
 
       {/* Desktop: Breadcrumbs on left */}
@@ -314,7 +311,7 @@ const Header = ({
                     color: crumb.isActive ? colors.breadcrumbActive : colors.breadcrumbInactive,
                     cursor: 'pointer',
                     fontSize: '18px',
-                    fontWeight: crumb.isActive ? 700 : 500,
+                    fontWeight: crumb.isActive ? 400 : 200,
                     lineHeight: '1.3',
                     transition: 'color 0.2s, font-weight 0.2s',
                     whiteSpace: 'nowrap',

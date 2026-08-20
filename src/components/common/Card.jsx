@@ -1,5 +1,5 @@
 import React from 'react'
-import { colors, spacing, borders } from '../../designTokens'
+import { colors, spacing, borders, cards } from '../../designTokens'
 
 const Card = ({
   children,
@@ -11,6 +11,7 @@ const Card = ({
   return (
     <div
       style={{
+        minHeight: cards.minHeight,
         backgroundColor: colors.cardBg,
         border: borders.card,
         borderRadius: borders.radius.card,

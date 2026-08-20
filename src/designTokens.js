@@ -3,6 +3,80 @@
 // Single Source of Truth for all design values
 // ============================================
 
+export const buttons = {
+  height: '40px',
+  paddingVertical: '6px',
+  paddingHorizontal: '16px',
+  borderRadius: '4px',
+  minWidth: '100px',
+};
+
+export const inputs = {
+  small: {
+    height: '40px',      // Single-line text input
+    paddingVertical: '8px',
+    paddingHorizontal: '12px',
+  },
+  medium: {
+    height: '120px',     // Multi-line text input
+    paddingVertical: '12px',
+    paddingHorizontal: '12px',
+  },
+  large: {
+    height: '500px',     // Expandable text area
+    paddingVertical: '12px',
+    paddingHorizontal: '12px',
+    resize: 'vertical',  // Allow vertical expansion
+  },
+  borderRadius: '4px',
+  // Colors
+  bg: '#FFFFFF',
+  text: '#333333',
+  placeholder: '#999999',
+  border: '#8B5A5A',
+  borderFocus: '#A0696B',
+};
+
+export const cards = {
+  minHeight: '100px',           // Hard minimum height for all cards
+  minWidth: '100px',            // Hard minimum width for all cards
+  gapBetween: '20px',           // Spacing between cards
+  
+  // Layout options - choose based on desired number of cards side-by-side
+  layouts: {
+    oneColumn: {
+      display: 'grid',
+      gridTemplateColumns: '1fr',  // 1 card per row (full width)
+    },
+    twoColumn: {
+      display: 'grid',
+      gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',  // 1-2 cards, grows to fill
+    },
+    threeColumn: {
+      display: 'grid',
+      gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',  // 2-3+ cards, grows to fill
+    },
+    fourColumn: {
+      display: 'grid',
+      gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',  // 3-4+ cards, grows to fill
+    },
+  },
+};
+
+export const pages = {
+  maxWidth: '1200px',
+  paddingMobile: '12px',
+  paddingDesktop: '32px',
+  marginH: '0 auto',
+  // Message card styles
+  errorCardBg: '#FEF2F2',
+  errorCardBorder: '2px solid',
+  successCardBg: '#F0F9F7',
+  successCardBorder: '2px solid',
+  // Loading state
+  loadingText: '16px',
+};
+
 export const colors = {
   // PRIMARY COLORS
   background: '#e8e8e8',      // Pale gray - main app background
@@ -23,8 +97,13 @@ export const colors = {
   headerButtonBgMobileTransparentHover: 'rgba(255, 255, 255, 0.3)', // Mobile button hover
 
   // BREADCRUMBS
-  breadcrumbActive: '#333333',   // Active breadcrumb (current page)
+  breadcrumbActive: '#A0696B',   // Active breadcrumb (current page)
   breadcrumbInactive: '#888888', // Inactive breadcrumb (links)
+
+  // SUBHEADER
+  subheaderTextActive: '#A0696B',   // Active tab text (sidebar burgundy)
+  subheaderTextInactive: '#656565', // Inactive tab text (muted gray)
+  subheaderBorder: '#A0696B',       // Active tab underline (sidebar burgundy)
 
   // NEW BURGUNDY PALETTE (for SubHeader, cards, blocks)
   darkBurgundy: '#4A1A1A',     // Dark burgundy - For titles of cards/blocks, borders
@@ -42,9 +121,9 @@ export const colors = {
   textDisabled: '#CCCCCC',     // Disabled text
 
   // BUTTONS & ACCENTS
-  button: '#A68C2C',           // Gold button color
+  button: '#A0696B',           // Gold button color
   buttonHover: '#9B7A25',      // Darker on hover
-  buttonDelete: '#DC4B4B',     // Red for delete actions
+  buttonDelete: '#a1a1a1',     // Red for delete actions
   buttonDeleteHover: '#C43B3B', // Darker red on hover
 
   // STATUS/MESSAGES
@@ -129,4 +208,4 @@ export const crewRoles = [
   'Lighting Technician', 'Sound Technician', 'Musician', 'Technician', 'Other',
 ];
 
-export default { colors, castColors, fonts, spacing, typography, borders, shadows, components, responsive, crewRoles };
+export default { colors, castColors, buttons, inputs, cards, pages, fonts, spacing, typography, borders, shadows, components, responsive, crewRoles };

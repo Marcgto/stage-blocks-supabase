@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { colors, spacing, typography } from '../designTokens'
+import { colors, spacing, typography, buttons } from '../designTokens'
 import Card from '../components/common/Card'
+import Input from '../components/common/Input'
+import PageTemplate from '../components/layout/PageTemplate'
 import { supabase } from '../lib/supabase'
 
 const ProjectSelectorPage = ({ currentProject, onProjectSelect, userId }) => {
@@ -69,38 +71,36 @@ const ProjectSelectorPage = ({ currentProject, onProjectSelect, userId }) => {
     }
   }
 
-  if (loading) return <p>Loading...</p>
+  if (loading) return <PageTemplate isLoading={true} />
 
   return (
-    <div style={{ maxWidth: '800px', margin: '0 auto' }}>
-        <h1 style={{ color: colors.textPrimary, marginBottom: spacing.lg }}>Projects</h1>
+    <PageTemplate 
+      title="Projects"
+      errorMessage={error}
+      successMessage={currentProject ? `✓ Loaded: ${currentProject.name}` : null}
+    >
+      <Card style={{ padding: spacing.lg, marginBottom: spacing.lg }}>
+        <h2 style={{ color: colors.textPrimary, marginTop: 0 }}>Create Project</h2>
+        <form onSubmit={handleCreateProject} style={{ display: 'flex', flexDirection: 'column', gap: spacing.md, alignItems: 'flex-start' }}>
+          <Input size="small" placeholder="Project Name" value={newProjectName} onChange={(e) => setNewProjectName(e.target.value)} />
+          <button type="submit" style={{ height: buttons.height, padding: `${buttons.paddingVertical} ${buttons.paddingHorizontal}`, backgroundColor: colors.button, color: '#FFF', border: 'none', borderRadius: buttons.borderRadius, cursor: 'pointer', boxSizing: 'border-box' }} onMouseEnter={(e) => e.target.style.backgroundColor = colors.buttonHover} onMouseLeave={(e) => e.target.style.backgroundColor = colors.button}>Create</button>
+        </form>
+      </Card>
 
-        {error && <Card style={{ padding: spacing.md, marginBottom: spacing.lg, backgroundColor: '#FEF2F2', borderColor: colors.error }}><p style={{ color: colors.error, margin: 0 }}>{error}</p></Card>}
-
-        {currentProject && <Card style={{ padding: spacing.md, marginBottom: spacing.lg, backgroundColor: '#F0F9F7', borderColor: colors.success }}><p style={{ color: colors.success, margin: 0 }}>✓ Loaded: {currentProject.name}</p></Card>}
-
-        <Card style={{ padding: spacing.lg, marginBottom: spacing.lg }}>
-          <h2 style={{ color: colors.textPrimary, marginTop: 0 }}>Create Project</h2>
-          <form onSubmit={handleCreateProject}>
-            <input type="text" placeholder="Project Name" value={newProjectName} onChange={(e) => setNewProjectName(e.target.value)} style={{ width: '100%', padding: spacing.sm, marginBottom: spacing.md, border: `1px solid ${colors.cardBorder}`, borderRadius: '4px' }} />
-            <button type="submit" style={{ width: '100%', padding: spacing.sm, backgroundColor: colors.button, color: '#FFF', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>Create</button>
-          </form>
-        </Card>
-
-        <div>
-          {projects.map(p => (
-            <Card key={p.id} style={{ padding: spacing.lg, marginBottom: spacing.md }}>
-              <h3 style={{ color: colors.textPrimary, margin: 0, marginBottom: spacing.xs }}>{p.name}</h3>
-              <p style={{ color: colors.textMuted, margin: 0, marginBottom: spacing.md }}>{p.description || 'No description'}</p>
-              <div style={{ display: 'flex', gap: spacing.sm }}>
-                <button onClick={() => handleSelectProject(p.id, p.name)} style={{ flex: 1, padding: spacing.sm, backgroundColor: colors.button, color: '#FFF', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>Load</button>
-                <button onClick={() => handleDeleteProject(p.id)} style={{ padding: spacing.sm, backgroundColor: '#999', color: '#FFF', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>Delete</button>
-              </div>
-            </Card>
-          ))}
-        </div>
+      <div>
+        {projects.map(p => (
+          <Card key={p.id} style={{ padding: spacing.lg, marginBottom: spacing.md }}>
+            <h3 style={{ color: colors.textPrimary, margin: 0, marginBottom: spacing.xs }}>{p.name}</h3>
+            <p style={{ color: colors.textMuted, margin: 0, marginBottom: spacing.md }}>{p.description || 'No description'}</p>
+            <div style={{ display: 'flex', gap: spacing.sm }}>
+              <button onClick={() => handleSelectProject(p.id, p.name)} style={{ height: buttons.height, padding: `${buttons.paddingVertical} ${buttons.paddingHorizontal}`, backgroundColor: colors.button, color: '#FFF', border: 'none', borderRadius: buttons.borderRadius, cursor: 'pointer', boxSizing: 'border-box' }} onMouseEnter={(e) => e.target.style.backgroundColor = colors.buttonHover} onMouseLeave={(e) => e.target.style.backgroundColor = colors.button}>Load</button>
+              <button onClick={() => handleDeleteProject(p.id)} style={{ height: buttons.height, padding: `${buttons.paddingVertical} ${buttons.paddingHorizontal}`, backgroundColor: colors.buttonDelete, color: '#FFF', border: 'none', borderRadius: buttons.borderRadius, cursor: 'pointer', boxSizing: 'border-box' }} onMouseEnter={(e) => e.target.style.backgroundColor = colors.buttonDeleteHover} onMouseLeave={(e) => e.target.style.backgroundColor = colors.buttonDelete}>Delete</button>
+            </div>
+          </Card>
+        ))}
       </div>
-    )
+    </PageTemplate>
+  )
   }
 
 export default ProjectSelectorPage

@@ -1,5 +1,5 @@
 import React from 'react'
-import { colors, typography, spacing } from '../../designTokens'
+import { colors, typography, spacing, buttons } from '../../designTokens'
 
 const Button = ({
   children,
@@ -14,15 +14,15 @@ const Button = ({
   const sizeStyles = {
     small: {
       fontSize: '12px',
-      padding: `${spacing.xs} ${spacing.sm}`,
+      padding: `${buttons.paddingVertical} ${buttons.paddingHorizontal}`,
     },
     medium: {
       fontSize: '14px',
-      padding: `${spacing.xs} ${spacing.md}`,
+      padding: `${buttons.paddingVertical} ${buttons.paddingHorizontal}`,
     },
     large: {
       fontSize: '16px',
-      padding: `${spacing.sm} ${spacing.lg}`,
+      padding: `${buttons.paddingVertical} ${buttons.paddingHorizontal}`,
     },
   }
 
@@ -45,14 +45,16 @@ const Button = ({
   }
 
   const baseStyles = {
+    height: buttons.height,
     fontWeight: typography.buttonText.fontWeight,
     lineHeight: typography.buttonText.lineHeight,
-    borderRadius: '8px',
+    borderRadius: buttons.borderRadius,
     cursor: disabled ? 'not-allowed' : 'pointer',
     opacity: disabled ? 0.5 : 1,
     transition: 'all 0.2s ease-in-out',
     border: 'none',
     outline: 'none',
+    minWidth: buttons.minWidth,
     ...sizeStyles[size],
     ...variantStyles[variant],
   }

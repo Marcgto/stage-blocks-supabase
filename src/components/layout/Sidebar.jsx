@@ -67,8 +67,8 @@ const Sidebar = ({ items = [], onMenuItemClick = () => {} }) => {
 
   const handleSubmenuClick = (subitem) => {
     navigate(subitem.path)
+    setActiveMenu(subitem.label) // Only set active menu when navigating to submenu
     onMenuItemClick() // Close mobile menu on navigation
-    // Menu stays open - we DON'T toggle or close it
   }
 
   const isMenuActive = (item) => {
@@ -136,10 +136,7 @@ const Sidebar = ({ items = [], onMenuItemClick = () => {} }) => {
             <div key={item.label}>
               {/* Main Menu Item */}
               <div
-                onClick={() => {
-                  handleMenuItemClick(item)
-                  setActiveMenu(item.label)
-                }}
+                onClick={() => handleMenuItemClick(item)}
                 style={{
                   padding: `${spacing.sm} ${spacing.sm}`,
                   cursor: 'pointer',
