@@ -1,26 +1,29 @@
 import React from 'react'
-import { useProject } from '../components/common/PageWrapper'
-import { colors, spacing, typography } from '../designTokens'
+import { useAppContext } from '../components/common/PageWrapper'
+import { colors, cards } from '../designTokens'
+import PageTemplate from '../components/layout/PageTemplate'
 import Card from '../components/common/Card'
 
 const Dashboard = () => {
-  const { currentProject } = useProject()
+  const { currentProject, loading } = useAppContext()
 
   return (
-    <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-        {!currentProject ? (
-          <Card style={{ padding: spacing.lg, marginBottom: spacing.lg }}>
-            <p style={{ color: colors.textPrimary, fontSize: typography.body, margin: 0, marginBottom: spacing.sm }}>⚠️ No project loaded</p>
-            <p style={{ color: colors.textMuted, fontSize: typography.small, margin: 0 }}>Click "Projects" in sidebar to load a project.</p>
+    <PageTemplate
+      title={currentProject?.name || 'Dashboard'}
+      isLoading={loading}
+    >
+      {currentProject && !loading && (
+        <div style={{ ...cards.layouts.oneColumn, gap: cards.gapBetween }}>
+          {/* Card 1: Project Description */}
+          <Card>
+            <p style={{ color: colors.textMuted, margin: 0 }}>
+              {currentProject.description || 'No description added yet.'}
+            </p>
           </Card>
-        ) : (
-          <>
-            <h1 style={{ fontSize: typography.h1, color: colors.textPrimary, marginTop: 0, marginBottom: spacing.md }}>{currentProject.name}</h1>
-            <Card style={{ padding: spacing.lg }}><p style={{ color: colors.textMuted, margin: 0 }}>{currentProject.description || 'No description'}</p></Card>
-          </>
-        )}
-      </div>
-    )
-  }
+        </div>
+      )}
+    </PageTemplate>
+  )
+}
 
 export default Dashboard

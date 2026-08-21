@@ -77,7 +77,6 @@ const ProjectSelectorPage = ({ currentProject, onProjectSelect, userId }) => {
     <PageTemplate 
       title="Projects"
       errorMessage={error}
-      successMessage={currentProject ? `✓ Loaded: ${currentProject.name}` : null}
     >
       <Card style={{ padding: spacing.lg, marginBottom: spacing.lg }}>
         <h2 style={{ color: colors.textPrimary, marginTop: 0 }}>Create Project</h2>

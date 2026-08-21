@@ -16,11 +16,22 @@ const Header = ({
   const getBreadcrumbs = () => {
     const path = location.pathname
     
-    // If at /projects (project selector), show just "Projects"
+    // If at /projects (project selector), show project name + Projects
     if (path === '/projects') {
-      return [
-        { label: 'Projects', link: '/projects', isActive: true }
-      ]
+      const breadcrumbs = []
+      if (projectName) {
+        breadcrumbs.push({
+          label: projectName,
+          link: '/dashboard',
+          isActive: false
+        })
+      }
+      breadcrumbs.push({
+        label: 'Projects',
+        link: '/projects',
+        isActive: true
+      })
+      return breadcrumbs
     }
 
     const breadcrumbs = []
@@ -270,7 +281,7 @@ const Header = ({
         </button>
       )}
 
-      {/* Mobile: Stage Blocks title */}
+      {/* Mobile: Project name (or app name if no project) */}
       {isMobile && (
         <span
           style={{
@@ -282,75 +293,91 @@ const Header = ({
             textOverflow: 'ellipsis',
           }}
         >
-          Stage Blocks
+          {projectName || 'Stage Blocks'}
         </span>
       )}
 
-      {/* Desktop: Breadcrumbs on left */}
+      {/* Desktop: Breadcrumbs on left, or fallback to project name */}
       {!isMobile && (
         <div style={{ display: 'flex', alignItems: 'center', gap: spacing.md, flex: 1, minWidth: 0 }}>
-          {breadcrumbs.map((crumb, index) => (
-            <div key={index} style={{ display: 'flex', alignItems: 'center', gap: spacing.md, minWidth: 0 }}>
-              {index > 0 && (
-                <span style={{
-                  color: colors.textMuted,
-                  fontSize: '18px',
-                  fontWeight: 400,
-                  flex: '0 0 auto',
-                }}>
-                  →
-                </span>
-              )}
-              
-              {crumb.link ? (
-                <button
-                  onClick={() => navigate(crumb.link)}
-                  style={{
-                    background: 'none',
-                    border: 'none',
-                    color: crumb.isActive ? colors.breadcrumbActive : colors.breadcrumbInactive,
-                    cursor: 'pointer',
+          {breadcrumbs.length > 0 ? (
+            breadcrumbs.map((crumb, index) => (
+              <div key={index} style={{ display: 'flex', alignItems: 'center', gap: spacing.md, minWidth: 0 }}>
+                {index > 0 && (
+                  <span style={{
+                    color: colors.textMuted,
                     fontSize: '18px',
-                    fontWeight: crumb.isActive ? 400 : 200,
+                    fontWeight: 400,
+                    flex: '0 0 auto',
+                  }}>
+                    →
+                  </span>
+                )}
+                
+                {crumb.link ? (
+                  <button
+                    onClick={() => navigate(crumb.link)}
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      color: crumb.isActive ? colors.breadcrumbActive : colors.breadcrumbInactive,
+                      cursor: 'pointer',
+                      fontSize: '18px',
+                      fontWeight: crumb.isActive ? 400 : 200,
+                      lineHeight: '1.3',
+                      transition: 'color 0.2s, font-weight 0.2s',
+                      whiteSpace: 'nowrap',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      flex: '0 1 auto',
+                      padding: 0,
+                    }}
+                    onMouseEnter={(e) => {
+                      if (!crumb.isActive) {
+                        e.target.style.color = colors.breadcrumbActive
+                        e.target.style.fontWeight = '600'
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (!crumb.isActive) {
+                        e.target.style.color = colors.breadcrumbInactive
+                        e.target.style.fontWeight = '500'
+                      }
+                    }}
+                  >
+                    {crumb.label}
+                  </button>
+                ) : (
+                  <span style={{
+                    color: colors.breadcrumbActive,
+                    fontSize: '18px',
+                    fontWeight: 700,
                     lineHeight: '1.3',
-                    transition: 'color 0.2s, font-weight 0.2s',
                     whiteSpace: 'nowrap',
                     overflow: 'hidden',
                     textOverflow: 'ellipsis',
                     flex: '0 1 auto',
-                    padding: 0,
-                  }}
-                  onMouseEnter={(e) => {
-                    if (!crumb.isActive) {
-                      e.target.style.color = colors.breadcrumbActive
-                      e.target.style.fontWeight = '600'
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    if (!crumb.isActive) {
-                      e.target.style.color = colors.breadcrumbInactive
-                      e.target.style.fontWeight = '500'
-                    }
-                  }}
-                >
-                  {crumb.label}
-                </button>
-              ) : (
-                <span style={{
-                  color: colors.breadcrumbActive,
-                  fontSize: '18px',
-                  fontWeight: 700,
-                  lineHeight: '1.3',
-                  whiteSpace: 'nowrap',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  flex: '0 1 auto',
-                }}>
-                  {crumb.label}
-                </span>
-              )}
-            </div>
-          ))}
+                  }}>
+                    {crumb.label}
+                  </span>
+                )}
+              </div>
+            ))
+          ) : (
+            // Fallback: show project name if no breadcrumbs (e.g., no project loaded)
+            <span style={{
+              color: colors.breadcrumbActive,
+              fontSize: '18px',
+              fontWeight: 700,
+              lineHeight: '1.3',
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              flex: '0 1 auto',
+            }}>
+              {projectName || 'Stage Blocks'}
+            </span>
+          )}
         </div>
       )}
 

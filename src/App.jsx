@@ -65,13 +65,22 @@ const WrappedEquipmentList = withProject(EquipmentListPage)
 
 function AppContent() {
   const { user } = useAppContext()
+  
+  // Get last viewed page from localStorage, default to /dashboard
+  const getDefaultRoute = () => {
+    if (typeof window !== 'undefined') {
+      const lastPage = localStorage.getItem('lastViewedPage')
+      return lastPage && lastPage !== '/' ? lastPage : '/dashboard'
+    }
+    return '/dashboard'
+  }
 
   return (
     <Router>
       <Routes>
         {/* Public routes */}
-        <Route path="/" element={user ? <Navigate to="/dashboard" /> : <LoginPage />} />
-        <Route path="/login" element={user ? <Navigate to="/dashboard" /> : <LoginPage />} />
+        <Route path="/" element={user ? <Navigate to={getDefaultRoute()} /> : <LoginPage />} />
+        <Route path="/login" element={user ? <Navigate to={getDefaultRoute()} /> : <LoginPage />} />
 
         {/* Protected routes - all wrapped in DashboardLayout with persistent Sidebar */}
         {user === undefined ? (
@@ -106,7 +115,7 @@ function AppContent() {
             <Route path="/equipment/production" element={<WrappedProductionEquipment />} />
             <Route path="/equipment/list" element={<WrappedEquipmentList />} />
             <Route path="/profile" element={<ProfileSettingsPage />} />
-            <Route path="*" element={<Navigate to="/dashboard" />} />
+            <Route path="*" element={<Navigate to={getDefaultRoute()} />} />
           </Route>
         ) : (
           <Route path="*" element={<Navigate to="/login" />} />

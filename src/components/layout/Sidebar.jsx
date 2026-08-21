@@ -60,8 +60,9 @@ const Sidebar = ({ items = [], onMenuItemClick = () => {} }) => {
       // Items WITH submenus: toggle expand/collapse
       toggleExpanded(item.label)
     } else if (item.path) {
-      // Items WITHOUT submenus (like Dashboard, Settings): navigate directly
+      // Items WITHOUT submenus (like Dashboard, Settings): navigate directly and close mobile menu
       navigate(item.path)
+      onMenuItemClick() // Close mobile sidebar on navigation
     }
   }
 

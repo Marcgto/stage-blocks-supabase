@@ -36,7 +36,11 @@ export const AppProvider = ({ children }) => {
       const { data: { session } } = await supabase.auth.getSession()
       setUser(session?.user || null)
       if (session?.user) await fetchLastProject(session.user.id)
-      setLoading(false)
+      
+      // Delay before marking as not loading (prevents "no project" flash)
+      setTimeout(() => {
+        setLoading(false)
+      }, 500)
     }
 
     checkAuth()

@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Outlet } from 'react-router-dom'
+import { Outlet, useLocation } from 'react-router-dom'
 import Sidebar from './Sidebar'
 import Header from './Header'
 import SubHeader from './SubHeader'
@@ -10,6 +10,7 @@ import { menuConfig } from '../../menuConfig'
 
 const DashboardLayout = () => {
   const { currentProject } = useProject()
+  const location = useLocation()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1024)
 
@@ -21,6 +22,11 @@ const DashboardLayout = () => {
     window.addEventListener('resize', handleResize)
     return () => window.removeEventListener('resize', handleResize)
   }, [])
+
+  // Save current page to localStorage
+  React.useEffect(() => {
+    localStorage.setItem('lastViewedPage', location.pathname)
+  }, [location.pathname])
 
   const isMobile = windowWidth < 1024
   const isDesktop = windowWidth >= 1024
