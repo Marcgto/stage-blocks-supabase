@@ -8,7 +8,6 @@ export const menuConfig = [
     path: '/projects',
     submenu: [
       { label: 'Project Selector', path: '/projects' },
-      { label: 'Project Settings', path: '/project-settings' },
       { label: 'Cast & Crew', path: '/cast-crew' },
       { label: 'Characters', path: '/characters' },
       { label: 'Ticket sales', path: '/ticket-sales' },

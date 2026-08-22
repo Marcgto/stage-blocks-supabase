@@ -10,7 +10,6 @@ import ProjectSetupPage from './pages/ProjectSetupPage'
 import StageDirectionsPage from './pages/StageDirectionsPage'
 import ProfileSettingsPage from './pages/ProfileSettingsPage'
 import RehearsalNotesPage from './pages/RehearsalNotesPage'
-import ProjectSettingsPage from './pages/ProjectSettingsPage'
 import CastCrewPage from './pages/CastCrewPage'
 import CharactersPage from './pages/CharactersPage'
 import BlocksPage from './pages/BlocksPage'
@@ -37,7 +36,6 @@ import EquipmentListPage from './pages/EquipmentListPage'
 // Wrap all pages with withProject HOC
 const WrappedDashboard = withProject(Dashboard)
 const WrappedProjectSelector = withProject(ProjectSelectorPage)
-const WrappedProjectSettings = withProject(ProjectSettingsPage)
 const WrappedCastCrew = withProject(CastCrewPage)
 const WrappedCharacters = withProject(CharactersPage)
 const WrappedStageDirections = withProject(StageDirectionsPage)
@@ -89,7 +87,6 @@ function AppContent() {
           <Route element={<DashboardLayout />}>
             <Route path="/dashboard" element={<WrappedDashboard />} />
             <Route path="/projects" element={<WrappedProjectSelector />} />
-            <Route path="/project-settings" element={<WrappedProjectSettings />} />
             <Route path="/cast-crew" element={<WrappedCastCrew />} />
             <Route path="/characters" element={<WrappedCharacters />} />
             <Route path="/stage-directions" element={<WrappedStageDirections />} />
