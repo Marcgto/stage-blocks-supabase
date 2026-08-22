@@ -30,7 +30,7 @@ The app will open at `http://localhost:5173`
 ```
 src/
 ├── components/
-│   ├── layout/         (Header, Sidebar, AppLayout)
+│   ├── layout/         (Header, Sidebar, Dashboardlayout)
 │   └── common/         (Button, Card, Chip, Toast)
 ├── pages/              (All main pages)
 ├── hooks/              (Custom React hooks)

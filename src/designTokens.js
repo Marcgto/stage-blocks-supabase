@@ -40,7 +40,14 @@ export const inputs = {
 export const cards = {
   minHeight: '100px',           // Hard minimum height for all cards
   minWidth: '100px',            // Hard minimum width for all cards
-  gapBetween: '20px',           // Spacing between cards
+  gapBetween: '12px',           // Spacing between cards (reduced from 20px)
+  padding: '16px',              // Inner padding of all cards (reduced from 32px/spacing.lg)
+  
+  // Content spacing inside cards
+  content: {
+    titleMarginBottom: '12px',  // Space between card title (h2/h3) and content
+    elementGap: '12px',         // Space between form elements (input, button, etc.)
+  },
   
   // Layout options - choose based on desired number of cards side-by-side
   layouts: {
@@ -75,6 +82,12 @@ export const pages = {
   successCardBorder: '2px solid',
   // Loading state
   loadingText: '16px',
+};
+
+export const modals = {
+  labelColor: '#656565',
+  labelFontSize: '14px',
+  labelFontWeight: 600,
 };
 
 export const colors = {
@@ -144,13 +157,37 @@ export const colors = {
 };
 
 export const castColors = [
-  colors.castColor1, colors.castColor2, colors.castColor3, colors.castColor4,
-  colors.castColor5, colors.castColor6, colors.castColor7, colors.castColor8,
-  colors.castColor9, colors.castColor10, colors.castColor11, colors.castColor12,
-  colors.castColor13, colors.castColor14, colors.castColor15, colors.castColor16,
-  colors.castColor17, colors.castColor18, colors.castColor19, colors.castColor20,
-  colors.castColor21, colors.castColor22, colors.castColor23, colors.castColor24,
+  '#1D2433', '#242A3D', '#1B2A32', // Rich Neutrals
+  '#7A1A22', '#8C1833', '#87164B', // Vibrant Reds & Pinks
+  '#85361A', '#914324', '#7A4B19', // Vivid Oranges & Browns
+  '#5B631C', '#6E5D1B',             // Vibrant Yellows & Olives
+  '#235E34', '#19634B', '#135E66',  // Vivid Greens & Teals
+  '#184175', '#1B376E', '#1D2D6B',  // Vibrant Blues
+  '#4F2673', '#63226E', '#751F5B',  // Vivid Purples & Violets
 ];
+
+export const projectColors = {
+  slate: '#1D2433',
+  indigoGray: '#242A3D',
+  teal: '#1B2A32',
+  crimson: '#7A1A22',
+  burgundy: '#8C1833',
+  magenta: '#87164B',
+  orange: '#85361A',
+  terracotta: '#914324',
+  amber: '#7A4B19',
+  citron: '#5B631C',
+  olive: '#6E5D1B',
+  kelly: '#235E34',
+  emerald: '#19634B',
+  tealVivid: '#135E66',
+  navy: '#184175',
+  sapphire: '#1B376E',
+  cobalt: '#1D2D6B',
+  violet: '#4F2673',
+  amethyst: '#63226E',
+  orchid: '#751F5B',
+};
 
 export const fonts = {
   primary: "'Kumbh Sans', sans-serif",           // Main font for everything (header, sidebar, menus, tabs, content, buttons)

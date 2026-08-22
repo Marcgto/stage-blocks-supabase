@@ -1,17 +1,22 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { colors, spacing, typography, buttons } from '../designTokens'
+import { colors, cards, spacing } from '../designTokens'
 import Card from '../components/common/Card'
-import Input from '../components/common/Input'
+import Button from '../components/common/Button'
 import PageTemplate from '../components/layout/PageTemplate'
+import Modal from '../components/common/Modal'
+import CreateProjectForm from '../components/common/CreateProjectForm'
 import { supabase } from '../lib/supabase'
+import { Image } from 'lucide-react'
 
 const ProjectSelectorPage = ({ currentProject, onProjectSelect, userId }) => {
   const navigate = useNavigate()
   const [projects, setProjects] = useState([])
-  const [newProjectName, setNewProjectName] = useState('')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false)
+  const [editingProject, setEditingProject] = useState(null)
 
   useEffect(() => {
     fetchProjects()
@@ -37,23 +42,20 @@ const ProjectSelectorPage = ({ currentProject, onProjectSelect, userId }) => {
     }
   }
 
-  const handleCreateProject = async (e) => {
-    e.preventDefault()
-    if (!newProjectName.trim()) return
+  const handleCreateSuccess = async (newProject) => {
+    setIsCreateModalOpen(false)
+    await fetchProjects()
+  }
 
-    try {
-      const { data: { user } } = await supabase.auth.getUser()
-      const { data, error: createError } = await supabase
-        .from('projects')
-        .insert([{ name: newProjectName, user_id: user.id, created_by: user.id }])
-        .select()
+  const handleEditClick = (project) => {
+    setEditingProject(project)
+    setIsEditModalOpen(true)
+  }
 
-      if (createError) throw createError
-      setNewProjectName('')
-      await fetchProjects()
-    } catch (err) {
-      setError('Failed to create project')
-    }
+  const handleEditSuccess = async (updatedProject) => {
+    setIsEditModalOpen(false)
+    setEditingProject(null)
+    await fetchProjects()
   }
 
   const handleSelectProject = (projectId, projectName) => {
@@ -75,29 +77,115 @@ const ProjectSelectorPage = ({ currentProject, onProjectSelect, userId }) => {
 
   return (
     <PageTemplate 
-      title="Projects"
       errorMessage={error}
     >
-      <Card style={{ padding: spacing.lg, marginBottom: spacing.lg }}>
-        <h2 style={{ color: colors.textPrimary, marginTop: 0 }}>Create Project</h2>
-        <form onSubmit={handleCreateProject} style={{ display: 'flex', flexDirection: 'column', gap: spacing.md, alignItems: 'flex-start' }}>
-          <Input size="small" placeholder="Project Name" value={newProjectName} onChange={(e) => setNewProjectName(e.target.value)} />
-          <button type="submit" style={{ height: buttons.height, padding: `${buttons.paddingVertical} ${buttons.paddingHorizontal}`, backgroundColor: colors.button, color: '#FFF', border: 'none', borderRadius: buttons.borderRadius, cursor: 'pointer', boxSizing: 'border-box' }} onMouseEnter={(e) => e.target.style.backgroundColor = colors.buttonHover} onMouseLeave={(e) => e.target.style.backgroundColor = colors.button}>Create</button>
-        </form>
-      </Card>
+      {/* Create Project Button - Above all cards */}
+      <div style={{ marginBottom: cards.gapBetween }}>
+        <Button onClick={() => setIsCreateModalOpen(true)}>
+          Create Project
+        </Button>
+      </div>
+
+      {/* Modal for creating project */}
+      <Modal
+        isOpen={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+        title="Create New Project"
+      >
+        <CreateProjectForm
+          onSuccess={handleCreateSuccess}
+          onCancel={() => setIsCreateModalOpen(false)}
+        />
+      </Modal>
+
+      {/* Project List Cards */}
 
       <div>
         {projects.map(p => (
-          <Card key={p.id} style={{ padding: spacing.lg, marginBottom: spacing.md }}>
-            <h3 style={{ color: colors.textPrimary, margin: 0, marginBottom: spacing.xs }}>{p.name}</h3>
-            <p style={{ color: colors.textMuted, margin: 0, marginBottom: spacing.md }}>{p.description || 'No description'}</p>
-            <div style={{ display: 'flex', gap: spacing.sm }}>
-              <button onClick={() => handleSelectProject(p.id, p.name)} style={{ height: buttons.height, padding: `${buttons.paddingVertical} ${buttons.paddingHorizontal}`, backgroundColor: colors.button, color: '#FFF', border: 'none', borderRadius: buttons.borderRadius, cursor: 'pointer', boxSizing: 'border-box' }} onMouseEnter={(e) => e.target.style.backgroundColor = colors.buttonHover} onMouseLeave={(e) => e.target.style.backgroundColor = colors.button}>Load</button>
-              <button onClick={() => handleDeleteProject(p.id)} style={{ height: buttons.height, padding: `${buttons.paddingVertical} ${buttons.paddingHorizontal}`, backgroundColor: colors.buttonDelete, color: '#FFF', border: 'none', borderRadius: buttons.borderRadius, cursor: 'pointer', boxSizing: 'border-box' }} onMouseEnter={(e) => e.target.style.backgroundColor = colors.buttonDeleteHover} onMouseLeave={(e) => e.target.style.backgroundColor = colors.buttonDelete}>Delete</button>
+          <Card key={p.id} style={{ padding: cards.padding, marginBottom: cards.gapBetween }}>
+            <div style={{ display: 'flex', gap: cards.content.elementGap, alignItems: 'flex-start' }}>
+              {/* Picture only - 90x90 square */}
+              <div style={{ display: 'flex', alignItems: 'center', flex: '0 0 auto' }}>
+                {p.picture_url ? (
+                  <img
+                    src={p.picture_url}
+                    alt={p.name}
+                    style={{
+                      width: '90px',
+                      height: '90px',
+                      borderRadius: '4px',
+                      objectFit: 'cover',
+                      border: `2px solid ${colors.textMuted}`,
+                    }}
+                  />
+                ) : (
+                  <div
+                    style={{
+                      width: '90px',
+                      height: '90px',
+                      borderRadius: '4px',
+                      backgroundColor: colors.textMuted,
+                      border: `2px solid ${colors.textMuted}`,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      color: colors.white,
+                    }}
+                  >
+                    <Image size={44} />
+                  </div>
+                )}
+              </div>
+
+              {/* Project info */}
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ marginBottom: cards.content.titleMarginBottom }}>
+                  <div
+                    style={{
+                      backgroundColor: p.color || colors.textMuted,
+                      color: colors.white,
+                      padding: `${spacing.xs} ${spacing.sm}`,
+                      borderRadius: '16px',
+                      display: 'inline-block',
+                      fontSize: '16px',
+                      fontWeight: 600,
+                      minWidth: '90px',
+                      textAlign: 'center',
+                    }}
+                  >
+                    {p.name}
+                  </div>
+                </div>
+                <p style={{ color: colors.textMuted, margin: 0, marginBottom: cards.content.elementGap }}>{p.description || 'No description'}</p>
+                <div style={{ display: 'flex', gap: cards.content.elementGap }}>
+                  <Button onClick={() => handleSelectProject(p.id, p.name)}>Load</Button>
+                  <Button variant="secondary" onClick={() => handleEditClick(p)}>Modify</Button>
+                  <Button variant="secondary" onClick={() => handleDeleteProject(p.id)}>Delete</Button>
+                </div>
+              </div>
             </div>
           </Card>
         ))}
       </div>
+
+      {/* Edit Modal */}
+      <Modal
+        isOpen={isEditModalOpen}
+        onClose={() => {
+          setIsEditModalOpen(false)
+          setEditingProject(null)
+        }}
+        title="Modify Project"
+      >
+        <CreateProjectForm
+          editingProject={editingProject}
+          onSuccess={handleEditSuccess}
+          onCancel={() => {
+            setIsEditModalOpen(false)
+            setEditingProject(null)
+          }}
+        />
+      </Modal>
     </PageTemplate>
   )
   }

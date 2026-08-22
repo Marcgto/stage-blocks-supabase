@@ -207,7 +207,6 @@ npm install
 
 **Sidebar not showing?**
 - Check browser console for errors
-- Verify `AppLayout` component is imported correctly
 
 ---
 
