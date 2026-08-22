@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { colors, cards, spacing } from '../designTokens'
 import Card from '../components/common/Card'
 import Button from '../components/common/Button'
+import Input from '../components/common/Input'
 import PageTemplate from '../components/layout/PageTemplate'
 import Modal from '../components/common/Modal'
 import CreateProjectForm from '../components/common/CreateProjectForm'
@@ -17,6 +18,9 @@ const ProjectSelectorPage = ({ currentProject, onProjectSelect, userId }) => {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [editingProject, setEditingProject] = useState(null)
+  const [deleteConfirmStep, setDeleteConfirmStep] = useState(null) // null, 'name-input', 'final-confirm'
+  const [deleteProjectId, setDeleteProjectId] = useState(null)
+  const [deleteNameInput, setDeleteNameInput] = useState('')
 
   useEffect(() => {
     fetchProjects()
@@ -63,13 +67,39 @@ const ProjectSelectorPage = ({ currentProject, onProjectSelect, userId }) => {
     navigate('/dashboard')
   }
 
-  const handleDeleteProject = async (projectId) => {
+  const handleDeleteClick = (projectId) => {
+    setDeleteProjectId(projectId)
+    setDeleteConfirmStep('name-input')
+    setDeleteNameInput('')
+  }
+
+  const handleDeleteNameConfirm = (projectName) => {
+    if (deleteNameInput === projectName) {
+      setDeleteConfirmStep('final-confirm')
+    } else {
+      setError('Project name does not match. Please try again.')
+      setDeleteNameInput('')
+    }
+  }
+
+  const handleDeleteProject = async () => {
     try {
-      const { error: deleteError } = await supabase.from('projects').delete().eq('id', projectId)
+      setLoading(true)
+      const { error: deleteError } = await supabase
+        .from('projects')
+        .delete()
+        .eq('id', deleteProjectId)
+
       if (deleteError) throw deleteError
+      
+      setDeleteConfirmStep(null)
+      setDeleteProjectId(null)
+      setDeleteNameInput('')
       await fetchProjects()
     } catch (err) {
       setError('Failed to delete project')
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -160,7 +190,7 @@ const ProjectSelectorPage = ({ currentProject, onProjectSelect, userId }) => {
                 <div style={{ display: 'flex', gap: cards.content.elementGap }}>
                   <Button onClick={() => handleSelectProject(p.id, p.name)}>Load</Button>
                   <Button variant="secondary" onClick={() => handleEditClick(p)}>Modify</Button>
-                  <Button variant="secondary" onClick={() => handleDeleteProject(p.id)}>Delete</Button>
+                  <Button variant="secondary" onClick={() => handleDeleteClick(p.id)}>Delete</Button>
                 </div>
               </div>
             </div>
@@ -186,8 +216,93 @@ const ProjectSelectorPage = ({ currentProject, onProjectSelect, userId }) => {
           }}
         />
       </Modal>
+
+      {/* Delete Confirmation Modal - Step 1: Enter Project Name */}
+      <Modal
+        isOpen={deleteConfirmStep === 'name-input'}
+        onClose={() => {
+          setDeleteConfirmStep(null)
+          setDeleteProjectId(null)
+          setDeleteNameInput('')
+        }}
+        title="Confirm Project Deletion"
+      >
+        <div style={{ display: 'flex', flexDirection: 'column', gap: cards.content.elementGap }}>
+          <p style={{ color: colors.textMuted, margin: 0 }}>
+            Type the project name exactly to confirm deletion:
+          </p>
+          <p style={{ color: colors.textPrimary, margin: 0, fontWeight: 600 }}>
+            {projects.find(p => p.id === deleteProjectId)?.name}
+          </p>
+          <Input
+            size="small"
+            placeholder="Enter project name"
+            value={deleteNameInput}
+            onChange={(e) => setDeleteNameInput(e.target.value)}
+            disabled={loading}
+          />
+          <div style={{ display: 'flex', gap: cards.content.elementGap, justifyContent: 'flex-end' }}>
+            <Button
+              variant="secondary"
+              onClick={() => {
+                setDeleteConfirmStep(null)
+                setDeleteProjectId(null)
+                setDeleteNameInput('')
+              }}
+              disabled={loading}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={() => handleDeleteNameConfirm(projects.find(p => p.id === deleteProjectId)?.name)}
+              disabled={loading || !deleteNameInput}
+            >
+              Confirm
+            </Button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* Delete Confirmation Modal - Step 2: Final Confirmation */}
+      <Modal
+        isOpen={deleteConfirmStep === 'final-confirm'}
+        onClose={() => {
+          setDeleteConfirmStep(null)
+          setDeleteProjectId(null)
+          setDeleteNameInput('')
+        }}
+        title="Final Confirmation"
+      >
+        <div style={{ display: 'flex', flexDirection: 'column', gap: cards.content.elementGap }}>
+          <p style={{ color: colors.textPrimary, margin: 0, fontWeight: 600 }}>
+            Are you sure you want to permanently delete this project?
+          </p>
+          <p style={{ color: colors.error, margin: 0 }}>
+            This action cannot be undone.
+          </p>
+          <div style={{ display: 'flex', gap: cards.content.elementGap, justifyContent: 'flex-end' }}>
+            <Button
+              variant="secondary"
+              onClick={() => {
+                setDeleteConfirmStep(null)
+                setDeleteProjectId(null)
+                setDeleteNameInput('')
+              }}
+              disabled={loading}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleDeleteProject}
+              disabled={loading}
+            >
+              {loading ? 'Deleting...' : 'Delete Project'}
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </PageTemplate>
   )
-  }
+}
 
 export default ProjectSelectorPage
