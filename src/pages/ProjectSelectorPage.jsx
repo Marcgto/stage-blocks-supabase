@@ -5,7 +5,7 @@ import Card from '../components/common/Card'
 import Button from '../components/common/Button'
 import PageTemplate from '../components/layout/PageTemplate'
 import Modal from '../components/common/Modal'
-import CreateProjectForm from '../components/common/CreateProjectForm'
+import CreateProjectForm from '../components/common/Createprojectform'
 import { supabase } from '../lib/supabase'
 import { Image } from 'lucide-react'
 
